@@ -4,8 +4,8 @@
  *
  * @example
  * ```ts
- * import { DenoAdapter } from "@sendx/sendx/adapters/deno";
- * import { createMailer } from "@sendx/sendx";
+ * import { DenoAdapter } from "@alialnaghmoush/sendx/adapters/deno";
+ * import { createMailer } from "@alialnaghmoush/sendx";
  *
  * const mailer = await createMailer({
  *   host: "smtp.example.com",

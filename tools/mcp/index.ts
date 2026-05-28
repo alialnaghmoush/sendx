@@ -79,7 +79,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
     }
     case "preview_mime": {
-      const result = previewMime(args as Parameters<typeof previewMime>[0]);
+      const result = await previewMime(args as Parameters<typeof previewMime>[0]);
       return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
     }
     case "check_smtp": {

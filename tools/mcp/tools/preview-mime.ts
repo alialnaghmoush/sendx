@@ -5,8 +5,8 @@ import { decodeUtf8 } from "../../../src/core/base64.js";
 /**
  * Build and return the raw MIME message without sending.
  */
-export function previewMime(input: MailOptions) {
-  const result = buildMIME(input);
+export async function previewMime(input: MailOptions) {
+  const result = await buildMIME(input);
   return {
     raw: decodeUtf8(result.raw),
     size: result.size,

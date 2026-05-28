@@ -4,8 +4,8 @@
  *
  * @example
  * ```ts
- * import { CloudflareAdapter } from "@sendx/sendx/adapters/cf";
- * import { createMailer } from "@sendx/sendx";
+ * import { CloudflareAdapter } from "@alialnaghmoush/sendx/adapters/cf";
+ * import { createMailer } from "@alialnaghmoush/sendx";
  *
  * const mailer = await createMailer({
  *   host: "smtp.example.com",

@@ -1,10 +1,16 @@
 import { describe, expect, test } from "bun:test";
-import { decodeUtf8 } from "../../src/core/base64.js";
+import { decodeUtf8, encodeBase64 } from "../../src/core/base64.js";
 import { buildMIME } from "../../src/core/mime.js";
 
+function derToPem(der: ArrayBuffer): string {
+  const b64 = encodeBase64(new Uint8Array(der)).replace(/\r\n/g, "");
+  const lines = b64.match(/.{1,64}/g) ?? [];
+  return `-----BEGIN PRIVATE KEY-----\n${lines.join("\n")}\n-----END PRIVATE KEY-----`;
+}
+
 describe("buildMIME", () => {
-  test("text only", () => {
-    const result = buildMIME({
+  test("text only", async () => {
+    const result = await buildMIME({
       from: "sender@example.com",
       to: "recipient@example.com",
       subject: "Hello",
@@ -18,8 +24,8 @@ describe("buildMIME", () => {
     expect(result.envelope.to).toEqual(["recipient@example.com"]);
   });
 
-  test("html only", () => {
-    const result = buildMIME({
+  test("html only", async () => {
+    const result = await buildMIME({
       from: "sender@example.com",
       to: "recipient@example.com",
       subject: "Hello",
@@ -31,8 +37,8 @@ describe("buildMIME", () => {
     expect(raw).toContain("<p>HTML body</p>");
   });
 
-  test("text and html alternative", () => {
-    const result = buildMIME({
+  test("text and html alternative", async () => {
+    const result = await buildMIME({
       from: "sender@example.com",
       to: "recipient@example.com",
       subject: "Hello",
@@ -46,8 +52,8 @@ describe("buildMIME", () => {
     expect(raw).toContain("<p>HTML</p>");
   });
 
-  test("inline image", () => {
-    const result = buildMIME({
+  test("inline image", async () => {
+    const result = await buildMIME({
       from: "sender@example.com",
       to: "recipient@example.com",
       subject: "Inline",
@@ -68,8 +74,8 @@ describe("buildMIME", () => {
     expect(raw).toContain("Content-ID: <logo>");
   });
 
-  test("file attachment", () => {
-    const result = buildMIME({
+  test("file attachment", async () => {
+    const result = await buildMIME({
       from: "sender@example.com",
       to: "recipient@example.com",
       subject: "Attachment",
@@ -88,8 +94,8 @@ describe("buildMIME", () => {
     expect(raw).toContain('filename="doc.pdf"');
   });
 
-  test("Arabic subject encoded", () => {
-    const result = buildMIME({
+  test("Arabic subject encoded", async () => {
+    const result = await buildMIME({
       from: "sender@example.com",
       to: "recipient@example.com",
       subject: "مرحبا",
@@ -100,8 +106,8 @@ describe("buildMIME", () => {
     expect(raw).toMatch(/Subject: =\?UTF-8\?B\?.+\?=/);
   });
 
-  test("BCC in envelope but not in headers", () => {
-    const result = buildMIME({
+  test("BCC in envelope but not in headers", async () => {
+    const result = await buildMIME({
       from: "sender@example.com",
       to: "visible@example.com",
       cc: "cc@example.com",
@@ -120,5 +126,37 @@ describe("buildMIME", () => {
     expect(raw).toContain("Cc: cc@example.com");
     expect(raw).not.toContain("Bcc:");
     expect(raw).not.toContain("hidden@example.com");
+  });
+
+  test("prepends DKIM-Signature when dkim config provided", async () => {
+    const { privateKey } = await crypto.subtle.generateKey(
+      {
+        name: "RSASSA-PKCS1-v1_5",
+        modulusLength: 2048,
+        publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
+        hash: "SHA-256",
+      },
+      true,
+      ["sign", "verify"],
+    );
+    const privatePem = derToPem(await crypto.subtle.exportKey("pkcs8", privateKey));
+
+    const result = await buildMIME(
+      {
+        from: "sender@example.com",
+        to: "recipient@example.com",
+        subject: "Signed",
+        text: "Body",
+      },
+      {
+        domainName: "example.com",
+        keySelector: "test",
+        privateKey: privatePem,
+        headerFieldNames: "from:to:subject",
+      },
+    );
+
+    const raw = decodeUtf8(result.raw);
+    expect(raw.startsWith("DKIM-Signature:")).toBe(true);
   });
 });

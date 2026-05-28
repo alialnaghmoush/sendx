@@ -4,8 +4,8 @@
  *
  * @example
  * ```ts
- * import { NodeAdapter } from "@sendx/sendx/adapters/node";
- * import { createMailer } from "@sendx/sendx";
+ * import { NodeAdapter } from "@alialnaghmoush/sendx/adapters/node";
+ * import { createMailer } from "@alialnaghmoush/sendx";
  *
  * const mailer = await createMailer({
  *   host: "smtp.example.com",

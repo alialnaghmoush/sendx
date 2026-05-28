@@ -1,0 +1,91 @@
+import { buildMIME } from "../core/mime.js";
+import type { MailOptions, SendResult, SMTPConfig } from "../core/types.js";
+import { resolveAttachments } from "../transports/resolve-attachments.js";
+import {
+  closeSMTPSession,
+  deliverSMTPMessage,
+  openSMTPSession,
+  resolveSMTPConfig,
+} from "../transports/smtp.js";
+
+/** A single pooled SMTP connection with a persistent session. */
+export interface PooledConnection {
+  /** Send one message over this connection. */
+  send(options: MailOptions): Promise<SendResult>;
+  /** Whether this connection is idle and available for work. */
+  readonly idle: boolean;
+  /** Number of messages sent on this connection. */
+  readonly messageCount: number;
+  /** Whether this connection can accept more messages before recycle. */
+  readonly usable: boolean;
+  /** Close the connection and end the SMTP session. */
+  close(): Promise<void>;
+}
+
+/** Options for creating a pooled connection. */
+export interface PooledConnectionOptions {
+  config: SMTPConfig;
+  maxMessages: number;
+  connectHost: string;
+  createAdapter: () => Promise<import("../core/types.js").SocketAdapter>;
+}
+
+/**
+ * Create a pooled SMTP connection with an open authenticated session.
+ */
+export async function createPooledConnection(
+  options: PooledConnectionOptions,
+): Promise<PooledConnection> {
+  const config = resolveSMTPConfig(options.config);
+  const adapter = await options.createAdapter();
+  await adapter.connect(options.connectHost, config.port);
+  await openSMTPSession(adapter, config);
+
+  let messageCount = 0;
+  let idle = true;
+  let sendChain: Promise<void> = Promise.resolve();
+
+  const maxMessages = options.maxMessages;
+
+  return {
+    get idle(): boolean {
+      return idle;
+    },
+    get messageCount(): number {
+      return messageCount;
+    },
+    get usable(): boolean {
+      return messageCount < maxMessages;
+    },
+
+    async send(mailOptions: MailOptions): Promise<SendResult> {
+      const run = async (): Promise<SendResult> => {
+        idle = false;
+        try {
+          const resolvedOptions = {
+            ...mailOptions,
+            attachments: await resolveAttachments(mailOptions.attachments),
+          };
+          const mime = await buildMIME(resolvedOptions, config.dkim);
+          const result = await deliverSMTPMessage(adapter, mime);
+          messageCount += 1;
+          return result;
+        } finally {
+          idle = true;
+        }
+      };
+
+      const resultPromise = sendChain.then(run);
+      sendChain = resultPromise.then(
+        () => undefined,
+        () => undefined,
+      );
+      return resultPromise;
+    },
+
+    async close(): Promise<void> {
+      await sendChain;
+      await closeSMTPSession(adapter);
+    },
+  };
+}

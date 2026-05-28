@@ -1,13 +1,17 @@
 // src/core/smtp.ts
 import { encodeBase64, encodeUtf8 } from "./base64.js";
 
+export { computeCRAMMD5 } from "./cram-md5.js";
+
 /** SMTP command to send to the server. */
 export type SMTPCommand =
   | { type: "EHLO"; domain: string }
   | { type: "STARTTLS" }
   | { type: "AUTH_LOGIN"; user: string; pass: string }
   | { type: "AUTH_PLAIN"; user: string; pass: string }
-  | { type: "AUTH_CRAM_MD5"; user: string; pass: string; challenge: string }
+  | { type: "AUTH_CRAM_MD5_INIT" }
+  | { type: "AUTH_CRAM_MD5_RESPONSE"; response: string }
+  | { type: "AUTH_XOAUTH2"; xoauth2String: string }
   | { type: "MAIL_FROM"; address: string }
   | { type: "RCPT_TO"; address: string }
   | { type: "DATA" }
@@ -58,8 +62,13 @@ export function encodeCommand(cmd: SMTPCommand): Uint8Array {
     case "AUTH_PLAIN":
       line = `AUTH PLAIN ${encodeBase64(`\0${cmd.user}\0${cmd.pass}`).replace(/\r\n/g, "")}`;
       break;
-    case "AUTH_CRAM_MD5":
-      line = `AUTH CRAM-MD5 ${encodeBase64(cmd.challenge).replace(/\r\n/g, "")}`;
+    case "AUTH_CRAM_MD5_INIT":
+      line = "AUTH CRAM-MD5";
+      break;
+    case "AUTH_CRAM_MD5_RESPONSE":
+      return encodeUtf8(`${cmd.response}\r\n`);
+    case "AUTH_XOAUTH2":
+      line = `AUTH XOAUTH2 ${cmd.xoauth2String}`;
       break;
     case "MAIL_FROM":
       line = `MAIL FROM:<${cmd.address}>`;
@@ -144,31 +153,25 @@ export function accumulateResponse(chunks: Uint8Array[]): Uint8Array | null {
 
 /**
  * Select the best AUTH method from EHLO capability lines.
- * v0.1: LOGIN > PLAIN only (CRAM-MD5 unsupported).
+ * Priority: XOAUTH2 > CRAM-MD5 > LOGIN > PLAIN.
  */
-export function selectAuthMethod(capabilities: string[]): "LOGIN" | "PLAIN" | "CRAM-MD5" {
+export function selectAuthMethod(
+  capabilities: string[],
+): "LOGIN" | "PLAIN" | "CRAM-MD5" | "OAUTH2" {
   const upper = capabilities.map((c) => c.toUpperCase());
+  if (upper.some((c) => c.includes("AUTH") && c.includes("XOAUTH2"))) {
+    return "OAUTH2";
+  }
+  if (upper.some((c) => c.includes("AUTH") && c.includes("CRAM-MD5"))) {
+    return "CRAM-MD5";
+  }
   if (upper.some((c) => c.includes("AUTH") && c.includes("LOGIN"))) {
     return "LOGIN";
   }
   if (upper.some((c) => c.includes("AUTH") && c.includes("PLAIN"))) {
     return "PLAIN";
   }
-  if (upper.some((c) => c.includes("AUTH") && c.includes("CRAM-MD5"))) {
-    return "CRAM-MD5";
-  }
   throw new SMTPError("No supported AUTH method", 0, "EHLO", capabilities.join(" "));
-}
-
-/**
- * Compute the CRAM-MD5 response (unsupported in v0.1).
- */
-export async function computeCRAMMD5(
-  _challenge: string,
-  _user: string,
-  _pass: string,
-): Promise<string> {
-  throw new SMTPError("CRAM-MD5 is not supported in sendx v0.1", 0, "AUTH CRAM-MD5", "");
 }
 
 /**

@@ -10,6 +10,8 @@ const entrypoints = [
   'src/transports/resend.ts',
   'src/transports/sendgrid.ts',
   'src/transports/postmark.ts',
+  'src/auth/oauth2.ts',
+  'src/pool/pool.ts',
 ]
 
 await build({

@@ -1,7 +1,8 @@
 // src/core/mime.ts
 import { extractEmails, parseAddresses, toMIMEHeader } from "./address.js";
 import { encodeBase64, encodeHeader, encodeUtf8 } from "./base64.js";
-import type { Attachment, Envelope, MailOptions } from "./types.js";
+import { signDKIM } from "./dkim.js";
+import type { Attachment, DKIMConfig, Envelope, MailOptions } from "./types.js";
 
 /** Result of building a complete MIME message. */
 export interface MIMEBuildResult {
@@ -15,8 +16,9 @@ const CRLF = "\r\n";
 
 /**
  * Build a complete MIME message as a Uint8Array ready for SMTP DATA.
+ * When `dkim` is provided, signs the message and prepends the DKIM-Signature header.
  */
-export function buildMIME(options: MailOptions): MIMEBuildResult {
+export async function buildMIME(options: MailOptions, dkim?: DKIMConfig): Promise<MIMEBuildResult> {
   const messageId = options.messageId ?? generateMessageId();
   const date = (options.date ?? new Date()).toUTCString();
   const fromAddrs = parseAddresses(options.from);
@@ -107,7 +109,13 @@ export function buildMIME(options: MailOptions): MIMEBuildResult {
   }
 
   const rawText = `${headers.join(CRLF)}${CRLF}${CRLF}${root.content}`;
-  const raw = encodeUtf8(rawText);
+  let raw = encodeUtf8(rawText);
+
+  if (dkim) {
+    const { header } = await signDKIM(raw, dkim);
+    const signedText = `${header}${CRLF}${rawText}`;
+    raw = encodeUtf8(signedText);
+  }
 
   return { raw, envelope, messageId, size: raw.length };
 }

@@ -442,3 +442,203 @@
 BunAdapter, DenoAdapter, CloudflareAdapter have no automated tests.
 These require their respective runtimes and will be covered in CI
 matrix (bun test / deno test / wrangler) in a future setup phase.
+
+---
+
+## v0.2 — Unit 1 — Core Types v0.2
+**Status:** completed
+**Date:** 2026-05-29
+
+### Files created
+- [none]
+
+### Files modified
+- src/core/types.ts — DKIMConfig, OAuth2Config, PoolConfig; SMTPAuth; SMTPConfig extends PoolConfig
+
+### Verification
+- [x] bun run typecheck
+- [x] bun run lint
+
+### Deviations from plan
+- [none]
+
+### Blocked by
+- none
+
+---
+
+## v0.2 — Unit 2 — CRAM-MD5
+**Status:** completed
+**Date:** 2026-05-29
+
+### Files created
+- src/core/cram-md5.ts
+- tests/core/cram-md5.test.ts
+
+### Files modified
+- src/core/smtp.ts — AUTH_CRAM_MD5_INIT/RESPONSE, selectAuthMethod priority
+- src/transports/smtp.ts — CRAM authenticate flow
+- tests/core/smtp.test.ts
+
+### Verification
+- [x] bun test
+- [x] bun run typecheck
+- [x] bun run lint
+
+### Deviations from plan
+- RFC 1321 vector 7 expected hash corrected to match standard MD5 output
+
+### Blocked by
+- none
+
+---
+
+## v0.2 — Unit 3 — DKIM Core
+**Status:** completed
+**Date:** 2026-05-29
+
+### Files created
+- src/core/dkim.ts
+- tests/core/dkim.test.ts
+
+### Verification
+- [x] bun test
+- [x] bun run typecheck
+- [x] bun run lint
+
+### Deviations from plan
+- OpenSSH PEM detection and runtime version errors per pre-start NOTE 1
+
+### Blocked by
+- none
+
+---
+
+## v0.2 — Unit 4 — DKIM Integration
+**Status:** completed
+**Date:** 2026-05-29
+
+### Files modified
+- src/core/mime.ts — async buildMIME + DKIM prepend
+- src/transports/smtp.ts — await buildMIME, dkim config
+- tests/core/mime.test.ts
+- tools/mcp/tools/preview-mime.ts
+- tools/mcp/index.ts
+
+### Verification
+- [x] bun test
+- [x] bun run typecheck
+- [x] bun run lint
+
+### Blocked by
+- none
+
+---
+
+## v0.2 — Unit 5 — OAuth2
+**Status:** completed
+**Date:** 2026-05-29
+
+### Files created
+- src/auth/oauth2.ts
+- tests/auth/oauth2.test.ts
+
+### Verification
+- [x] bun test
+- [x] bun run typecheck
+- [x] bun run lint
+
+### Blocked by
+- none
+
+---
+
+## v0.2 — Unit 6 — OAuth2 SMTP Integration
+**Status:** completed
+**Date:** 2026-05-29
+
+### Files modified
+- src/core/smtp.ts — AUTH_XOAUTH2, selectAuthMethod XOAUTH2
+- src/transports/smtp.ts — OAUTH2 authenticate
+- tests/transports/smtp.test.ts
+- tests/core/smtp.test.ts
+
+### Verification
+- [x] bun test
+- [x] bun run typecheck
+- [x] bun run lint
+
+### Blocked by
+- none
+
+---
+
+## v0.2 — Unit 7 — Connection Pool
+**Status:** completed
+**Date:** 2026-05-29
+
+### Files created
+- src/pool/connection.ts
+- src/pool/pool.ts
+- tests/pool/pool.test.ts
+
+### Files modified
+- src/transports/smtp.ts — openSMTPSession, deliverSMTPMessage, closeSMTPSession
+
+### Verification
+- [x] bun test
+- [x] bun run typecheck
+- [x] bun run lint
+
+### Deviations from plan
+- Required smtp.ts session refactor (documented in plan deviation)
+
+### Blocked by
+- none
+
+---
+
+## v0.2 — Unit 8 — Rate Limiter
+**Status:** completed
+**Date:** 2026-05-29
+
+### Files modified
+- src/pool/pool.ts — RateLimiter with injectable clock
+- tests/pool/pool.test.ts — deterministic rate limit test
+
+### Verification
+- [x] bun test
+- [x] bun run typecheck
+- [x] bun run lint
+
+### Deviations from plan
+- RateLimiter.notify() for deterministic tests (no sleep)
+
+### Blocked by
+- none
+
+---
+
+## v0.2 — Unit 9 — Version + Exports
+**Status:** completed
+**Date:** 2026-05-29
+
+### Files created
+- CHANGELOG.md
+
+### Files modified
+- src/index.ts — v0.2 exports
+- src/detect.ts — pool: true → SMTPPool
+- build.ts — auth/oauth2, pool entrypoints
+- package.json — 0.2.0, new exports
+- jsr.json — 0.2.0, new exports
+- README.md — DKIM, OAuth2, pooling docs
+
+### Verification
+- [x] bun test — 92 tests passed
+- [x] bun run typecheck
+- [x] bun run lint
+- [x] bun run build
+
+### Blocked by
+- none

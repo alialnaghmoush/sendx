@@ -94,10 +94,86 @@ export interface Transport {
   close?(): Promise<void>;
 }
 
+// ─── DKIM ─────────────────────────────────────────────────
+
+/** DKIM signing configuration for outbound messages. */
+export interface DKIMConfig {
+  /** Your domain name. e.g. "example.com" */
+  domainName: string;
+  /** Key selector. e.g. "2024" → looks up 2024._domainkey.example.com */
+  keySelector: string;
+  /**
+   * DKIM private key in PEM format.
+   * Supports RSA (minimum 1024-bit, 2048 recommended) and Ed25519.
+   */
+  privateKey: string;
+  /** Algorithm. Default: "rsa-sha256". Use "ed25519-sha256" for Ed25519 keys. */
+  algorithm?: "rsa-sha256" | "ed25519-sha256";
+  /**
+   * Header fields to sign (colon-separated).
+   * Default follows RFC 6376 §5.4 recommendations.
+   */
+  headerFieldNames?: string;
+  /**
+   * Skip signing these header fields even if listed in headerFieldNames.
+   * Useful to exclude "message-id" and "date" for privacy.
+   */
+  skipFields?: string;
+}
+
+// ─── OAuth2 ───────────────────────────────────────────────
+
+/** OAuth2 credentials for XOAUTH2 SMTP authentication. */
+export interface OAuth2Config {
+  /** The authenticated user's email address */
+  user: string;
+  /** OAuth2 client ID */
+  clientId: string;
+  /** OAuth2 client secret */
+  clientSecret: string;
+  /** Refresh token for automatic access token renewal */
+  refreshToken: string;
+  /** Current access token (optional — will be fetched if absent) */
+  accessToken?: string;
+  /** Token endpoint URL. Default: Google's token endpoint */
+  tokenUrl?: string;
+  /**
+   * Custom token provider function.
+   * If provided, clientId / clientSecret / refreshToken are ignored.
+   * The function must return a valid access token string.
+   */
+  getToken?: () => Promise<string>;
+}
+
+// ─── Pool Config ──────────────────────────────────────────
+
+/** Connection pool and rate limiting options for SMTP. */
+export interface PoolConfig {
+  /** Use connection pooling. Default: false */
+  pool?: boolean;
+  /** Maximum number of simultaneous SMTP connections. Default: 5 */
+  maxConnections?: number;
+  /**
+   * Maximum number of messages per connection before it is recycled.
+   * Default: 100
+   */
+  maxMessages?: number;
+  /**
+   * Maximum send rate in messages per second across all connections.
+   * Default: unlimited
+   */
+  rateDelta?: number;
+  /**
+   * The time window in milliseconds for rate limiting.
+   * Default: 1000 (1 second)
+   */
+  rateLimit?: number;
+}
+
 // ─── SMTP Config ──────────────────────────────────────────
 
 /** Configuration for SMTP transport and relay connections. */
-export interface SMTPConfig {
+export interface SMTPConfig extends PoolConfig {
   host: string;
   port?: number;
   secure?: boolean;
@@ -108,13 +184,15 @@ export interface SMTPConfig {
   socketTimeout?: number;
   direct?: boolean;
   adapter?: SocketAdapter;
+  dkim?: DKIMConfig;
 }
 
 /** SMTP authentication credentials and method hint. */
 export interface SMTPAuth {
   user: string;
-  pass: string;
-  type?: "LOGIN" | "PLAIN" | "CRAM-MD5";
+  pass?: string;
+  type?: "LOGIN" | "PLAIN" | "CRAM-MD5" | "OAUTH2";
+  oauth2?: OAuth2Config;
 }
 
 // ─── Mailer ───────────────────────────────────────────────

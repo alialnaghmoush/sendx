@@ -93,4 +93,88 @@ describe("SMTPTransport", () => {
     expect(dialog).toContain("DATA");
     expect(dialog).toContain("QUIT");
   });
+
+  test("verify with XOAUTH2 and getToken records AUTH XOAUTH2", async () => {
+    const adapter = new MockAdapter();
+    adapter.setResponses([
+      "220 smtp.example.com ESMTP\r\n",
+      "250-smtp.example.com\r\n250 AUTH XOAUTH2 LOGIN PLAIN\r\n",
+      "235 Authentication successful\r\n",
+      "221 Bye\r\n",
+    ]);
+
+    const transport = new SMTPTransport({
+      host: "smtp.example.com",
+      port: 465,
+      secure: true,
+      auth: {
+        user: "user@example.com",
+        type: "OAUTH2",
+        oauth2: {
+          user: "user@example.com",
+          clientId: "id",
+          clientSecret: "secret",
+          refreshToken: "refresh",
+          getToken: async () => "ya29.mock-token",
+        },
+      },
+      adapter,
+    });
+
+    await transport.verify();
+
+    const dialog = adapter.commands.map((c) => decodeUtf8(c)).join("");
+    expect(dialog).toContain("AUTH XOAUTH2");
+    const tokenB64 = dialog.match(/AUTH XOAUTH2 (\S+)/)?.[1] ?? "";
+    expect(() => atob(tokenB64)).not.toThrow();
+    const decoded = decodeUtf8(Uint8Array.from(atob(tokenB64), (c) => c.charCodeAt(0)));
+    expect(decoded).toContain("ya29.mock-token");
+  });
+
+  test("send with XOAUTH2 auth", async () => {
+    const adapter = new MockAdapter();
+    adapter.setResponses([
+      "220 smtp.example.com ESMTP\r\n",
+      "250-smtp.example.com\r\n250 AUTH XOAUTH2 LOGIN PLAIN\r\n",
+      "235 Authentication successful\r\n",
+      "250 Sender OK\r\n",
+      "250 Recipient OK\r\n",
+      "354 End data with <CR><LF>.<CR><LF>\r\n",
+      "250 Message accepted\r\n",
+      "221 Bye\r\n",
+    ]);
+
+    const transport = new SMTPTransport({
+      host: "smtp.example.com",
+      port: 465,
+      secure: true,
+      auth: {
+        user: "me@gmail.com",
+        type: "OAUTH2",
+        oauth2: {
+          user: "me@gmail.com",
+          clientId: "id",
+          clientSecret: "secret",
+          refreshToken: "refresh",
+          accessToken: "ya29.oauth-token",
+        },
+      },
+      adapter,
+    });
+
+    await transport.send({
+      from: "me@gmail.com",
+      to: "recipient@example.com",
+      subject: "OAuth2 test",
+      text: "Hello",
+    });
+
+    const dialog = adapter.commands.map((c) => decodeUtf8(c)).join("");
+    expect(dialog).toContain("AUTH XOAUTH2");
+    const xoauth2Line = dialog.match(/AUTH XOAUTH2 (\S+)/)?.[1] ?? "";
+    const decoded = decodeUtf8(
+      Uint8Array.from(atob(xoauth2Line), (c) => c.charCodeAt(0)),
+    );
+    expect(decoded).toContain("ya29.oauth-token");
+  });
 });

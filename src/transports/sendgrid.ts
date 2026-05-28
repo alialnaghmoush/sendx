@@ -4,8 +4,8 @@
  *
  * @example
  * ```ts
- * import { SendGridTransport } from "@sendx/sendx/transports/sendgrid";
- * import { createMailer } from "@sendx/sendx";
+ * import { SendGridTransport } from "@alialnaghmoush/sendx/transports/sendgrid";
+ * import { createMailer } from "@alialnaghmoush/sendx";
  *
  * const mailer = await createMailer({
  *   transport: new SendGridTransport({ apiKey: process.env.SENDGRID_API_KEY! }),

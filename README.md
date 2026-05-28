@@ -3,9 +3,11 @@
 **Runtime-agnostic email library for Node.js, Bun, Deno, and Cloudflare Workers.**
 
 [![npm version](https://img.shields.io/npm/v/sendx.svg)](https://www.npmjs.com/package/sendx)
+[![JSR](https://jsr.io/badges/@alialnaghmoush/sendx)](https://jsr.io/@alialnaghmoush/sendx)
 [![bundle size](https://img.shields.io/bundlephobia/minzip/sendx)](https://bundlephobia.com/package/sendx)
 [![license](https://img.shields.io/npm/l/sendx.svg)](LICENSE)
 [![tests](https://img.shields.io/badge/tests-passing-brightgreen)](#)
+[![GitHub](https://img.shields.io/github/stars/alialnaghmoush/sendx?style=social&label=GitHub)](https://github.com/alialnaghmoush/sendx)
 
 ---
 
@@ -14,22 +16,33 @@
 - **Works everywhere** — Node.js, Bun, Deno, Cloudflare Workers, and any environment with Web APIs
 - **True tree-shaking** — import only what you need; unused adapters and transports stay out of your bundle
 - **Zero dependencies in core** — MIME, SMTP protocol, and encoding use pure Web APIs only
+- **DKIM signing** — RSA-SHA256 and Ed25519-SHA256 via Web Crypto
+- **OAuth2 / XOAUTH2** — Gmail and Microsoft 365 SMTP auth with automatic token refresh
+- **Connection pooling** — reuse SMTP sessions with optional rate limiting
 - **TypeScript-first** — strict types, subpath exports, and full IDE support
 
 ---
 
 ## Installation
 
+**npm** ([sendx](https://www.npmjs.com/package/sendx)):
+
 ```bash
 bun add sendx
-```
-
-```bash
 npm install sendx
+pnpm add sendx
 ```
 
+**JSR** ([@alialnaghmoush/sendx](https://jsr.io/@alialnaghmoush/sendx)) — Deno, Bun, and other JSR-aware runtimes:
+
 ```bash
-pnpm add sendx
+deno add jsr:@alialnaghmoush/sendx
+bunx jsr add @alialnaghmoush/sendx
+```
+
+```typescript
+// JSR import path
+import { createMailer } from "@alialnaghmoush/sendx";
 ```
 
 ---
@@ -148,7 +161,69 @@ const mailer = await createMailer({ transport });
 await mailer.verify(); // test connection + auth
 ```
 
-**AUTH methods:** LOGIN and PLAIN are fully supported. CRAM-MD5 is planned for v0.2.
+**AUTH methods:** XOAUTH2, CRAM-MD5, LOGIN, and PLAIN (auto-negotiated from EHLO unless `auth.type` is set).
+
+#### DKIM signing
+
+```typescript
+const mailer = await createMailer({
+  host: "smtp.example.com",
+  auth: { user: "you@example.com", pass: "secret" },
+  dkim: {
+    domainName: "example.com",
+    keySelector: "2024",
+    privateKey: await Bun.file("dkim-private.pem").text(),
+  },
+});
+```
+
+#### Gmail OAuth2 (XOAUTH2)
+
+```typescript
+import { OAuth2Client } from "sendx/auth/oauth2";
+
+const mailer = await createMailer({
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  auth: {
+    type: "OAUTH2",
+    user: "me@gmail.com",
+    oauth2: {
+      user: "me@gmail.com",
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      refreshToken: process.env.GOOGLE_REFRESH_TOKEN!,
+    },
+  },
+});
+```
+
+#### Connection pooling
+
+```typescript
+const mailer = await createMailer({
+  host: "smtp.example.com",
+  pool: true,
+  maxConnections: 5,
+  maxMessages: 100,
+  rateDelta: 10,
+  rateLimit: 1000,
+  auth: { user: "you@example.com", pass: "secret" },
+});
+```
+
+Or use `SMTPPool` directly:
+
+```typescript
+import { SMTPPool } from "sendx/pool";
+
+const pool = new SMTPPool({
+  host: "smtp.example.com",
+  adapter: new NodeAdapter(),
+  auth: { user: "you@example.com", pass: "secret" },
+});
+```
 
 ### HTTP APIs
 
@@ -281,6 +356,12 @@ Approximate gzip sizes per subpath export:
 | `sendx/adapters/cf` | ~2 KB |
 
 ---
+
+## Links
+
+- **Source & issues:** [github.com/alialnaghmoush/sendx](https://github.com/alialnaghmoush/sendx)
+- **npm:** [npmjs.com/package/sendx](https://www.npmjs.com/package/sendx)
+- **JSR:** [jsr.io/@alialnaghmoush/sendx](https://jsr.io/@alialnaghmoush/sendx)
 
 ## License
 

@@ -1,6 +1,6 @@
 {
-  "name": "@sendx/sendx",
-  "version": "0.1.1",
+  "name": "@alialnaghmoush/sendx",
+  "version": "0.2.0",
   "description": "Runtime-agnostic email library for Node.js, Bun, Deno, and Cloudflare Workers",
   "license": "MIT",
   "publish": {
@@ -28,6 +28,8 @@
     "./transports/smtp": "./src/transports/smtp.ts",
     "./transports/resend": "./src/transports/resend.ts",
     "./transports/sendgrid": "./src/transports/sendgrid.ts",
-    "./transports/postmark": "./src/transports/postmark.ts"
+    "./transports/postmark": "./src/transports/postmark.ts",
+    "./auth/oauth2": "./src/auth/oauth2.ts",
+    "./pool": "./src/pool/pool.ts"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "sendx",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Runtime-agnostic email library for Node.js, Bun, Deno, and Cloudflare Workers",
   "type": "module",
   "sideEffects": false,
@@ -40,6 +40,14 @@
     "./transports/postmark": {
       "import": "./dist/transports/postmark.js",
       "types": "./dist/transports/postmark.d.ts"
+    },
+    "./auth/oauth2": {
+      "import": "./dist/auth/oauth2.js",
+      "types": "./dist/auth/oauth2.d.ts"
+    },
+    "./pool": {
+      "import": "./dist/pool/pool.js",
+      "types": "./dist/pool/pool.d.ts"
     }
   },
   "main": "./dist/index.js",
@@ -58,7 +66,11 @@
     "typecheck": "tsc --noEmit",
     "mcp": "bun tools/mcp/index.ts",
     "publish:dry": "bun scripts/publish.ts --dry-run",
-    "publish:release": "bun scripts/publish.ts"
+    "publish:release": "bun scripts/publish.ts",
+    "publish:npm": "bun scripts/publish.ts --npm",
+    "publish:npm:dry": "bun scripts/publish.ts --npm --dry-run",
+    "publish:jsr": "bun scripts/publish.ts --jsr",
+    "publish:jsr:dry": "bun scripts/publish.ts --jsr --dry-run"
   },
   "devDependencies": {
     "@biomejs/biome": "latest",
@@ -77,5 +89,13 @@
     "edge",
     "runtime-agnostic"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alialnaghmoush/sendx.git"
+  },
+  "homepage": "https://github.com/alialnaghmoush/sendx#readme",
+  "bugs": {
+    "url": "https://github.com/alialnaghmoush/sendx/issues"
+  }
 }

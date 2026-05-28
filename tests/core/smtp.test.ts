@@ -72,7 +72,15 @@ describe("parseEHLO", () => {
 });
 
 describe("selectAuthMethod", () => {
-  test("prefers LOGIN over PLAIN", () => {
+  test("prefers XOAUTH2 when advertised", () => {
+    expect(selectAuthMethod(["AUTH XOAUTH2 LOGIN PLAIN"])).toBe("OAUTH2");
+  });
+
+  test("prefers CRAM-MD5 over LOGIN", () => {
+    expect(selectAuthMethod(["AUTH CRAM-MD5 LOGIN PLAIN"])).toBe("CRAM-MD5");
+  });
+
+  test("prefers LOGIN over PLAIN when CRAM-MD5 absent", () => {
     expect(selectAuthMethod(["AUTH LOGIN PLAIN"])).toBe("LOGIN");
   });
 
@@ -82,8 +90,23 @@ describe("selectAuthMethod", () => {
 });
 
 describe("computeCRAMMD5", () => {
-  test("throws in v0.1", async () => {
-    await expect(computeCRAMMD5("challenge", "user", "pass")).rejects.toThrow(SMTPError);
+  test("returns base64 response", async () => {
+    const challenge = btoa("test-challenge");
+    const response = await computeCRAMMD5(challenge, "user", "pass");
+    expect(response.length).toBeGreaterThan(0);
+    expect(response).not.toContain("\r\n");
+  });
+});
+
+describe("AUTH_CRAM_MD5 commands", () => {
+  test("AUTH_CRAM_MD5_INIT", () => {
+    const cmd = encodeCommand({ type: "AUTH_CRAM_MD5_INIT" });
+    expect(decodeUtf8(cmd)).toBe("AUTH CRAM-MD5\r\n");
+  });
+
+  test("AUTH_CRAM_MD5_RESPONSE", () => {
+    const cmd = encodeCommand({ type: "AUTH_CRAM_MD5_RESPONSE", response: "dGltIGFiY2Q=" });
+    expect(decodeUtf8(cmd)).toBe("dGltIGFiY2Q=\r\n");
   });
 });
 

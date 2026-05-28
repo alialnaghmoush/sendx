@@ -9,6 +9,7 @@ import type {
   SocketAdapter,
   Transport,
 } from "./core/types.js";
+import { SMTPPool } from "./pool/pool.js";
 import { SMTPTransport } from "./transports/smtp.js";
 
 /** Detect the current JavaScript runtime. */
@@ -71,6 +72,22 @@ export async function createMailer(options: CreateMailerOptions): Promise<Mailer
   }
 
   const smtpConfig = options as SMTPConfig;
+
+  if (smtpConfig.pool) {
+    return new MailerImpl(
+      new SMTPPool(smtpConfig, {
+        createAdapter: async () =>
+          smtpConfig.adapter ??
+          (await createDefaultAdapter({
+            ...(smtpConfig.secure !== undefined ? { secure: smtpConfig.secure } : {}),
+            ...(smtpConfig.connectionTimeout !== undefined
+              ? { connectionTimeout: smtpConfig.connectionTimeout }
+              : {}),
+          })),
+      }),
+    );
+  }
+
   const adapter =
     smtpConfig.adapter ??
     (await createDefaultAdapter({
