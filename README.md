@@ -3,7 +3,7 @@
 **Runtime-agnostic email library for Node.js, Bun, Deno, and Cloudflare Workers.**
 
 [![npm version](https://img.shields.io/npm/v/sently.svg)](https://www.npmjs.com/package/sently)
-[![JSR](https://jsr.io/badges/@sently/sently)](https://jsr.io/@sently/sently)
+[![JSR](https://jsr.io/badges/@alialnaghmoush/sently)](https://jsr.io/@alialnaghmoush/sently)
 [![bundle size](https://img.shields.io/bundlephobia/minzip/sently)](https://bundlephobia.com/package/sently)
 [![license](https://img.shields.io/npm/l/sently.svg)](LICENSE)
 [![tests](https://img.shields.io/badge/tests-passing-brightgreen)](#)
@@ -35,11 +35,11 @@ npm install sently
 pnpm add sently
 ```
 
-**JSR** ([@sently/sently](https://jsr.io/@sently/sently)) — Deno, Bun, and other JSR-aware runtimes:
+**JSR** ([@alialnaghmoush/sently](https://jsr.io/@alialnaghmoush/sently)) — Deno, Bun, and other JSR-aware runtimes:
 
 ```bash
-deno add jsr:@sently/sently
-bunx jsr add @sently/sently
+deno add jsr:@alialnaghmoush/sently
+bunx jsr add @alialnaghmoush/sently
 ```
 
 ```typescript
@@ -431,7 +431,7 @@ Approximate gzip sizes per subpath export:
 
 - **Source & issues:** [github.com/alialnaghmoush/sently](https://github.com/alialnaghmoush/sently)
 - **npm:** [npmjs.com/package/sently](https://www.npmjs.com/package/sently)
-- **JSR:** [jsr.io/@sently/sently](https://jsr.io/@sently/sently)
+- **JSR:** [jsr.io/@alialnaghmoush/sently](https://jsr.io/@alialnaghmoush/sently)
 
 ## License
 
