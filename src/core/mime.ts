@@ -86,9 +86,7 @@ export async function buildMIME(options: MailOptions, dkim?: DKIMConfig): Promis
   ];
 
   if (ccAddrs.length > 0) {
-    headers.push(
-      foldHeader("Cc", ccAddrs.map((a) => toMIMEHeader(sanitizeAddress(a))).join(", ")),
-    );
+    headers.push(foldHeader("Cc", ccAddrs.map((a) => toMIMEHeader(sanitizeAddress(a))).join(", ")));
   }
 
   if (options.replyTo) {
@@ -117,9 +115,7 @@ export async function buildMIME(options: MailOptions, dkim?: DKIMConfig): Promis
 
   if (options.headers) {
     for (const [key, value] of Object.entries(options.headers)) {
-      headers.push(
-        foldHeader(sanitizeHeaderValue(key), sanitizeHeaderValue(value)),
-      );
+      headers.push(foldHeader(sanitizeHeaderValue(key), sanitizeHeaderValue(value)));
     }
   }
 

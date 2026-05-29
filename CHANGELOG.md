@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.2] — 2026-05-29
+
+### Fixed
+
+- Biome formatting in MIME header builder (`src/core/mime.ts`) so `bun lint` passes
+
 ## [0.3.1] — 2026-05-29
 
 ### Security

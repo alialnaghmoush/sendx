@@ -1,6 +1,6 @@
 {
   "name": "@alialnaghmoush/sently",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Runtime-agnostic email library for Node.js, Bun, Deno, and Cloudflare Workers",
   "license": "MIT",
   "publish": {
