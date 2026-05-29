@@ -8,17 +8,17 @@ export interface SendTestInput {
 }
 
 /**
- * Send a test email using any sendx SMTP config.
+ * Send a test email using any sently SMTP config.
  */
 export async function sendTestEmail(input: SendTestInput) {
   try {
     const mailer = await createMailer(input.config);
-    const from = input.config.auth?.user ?? "test@sendx.dev";
+    const from = input.config.auth?.user ?? "test@sently.dev";
     const result = await mailer.send({
       from,
       to: input.to,
-      subject: input.subject ?? "sendx test email",
-      text: "This is a test email sent by the sendx MCP tool.",
+      subject: input.subject ?? "sently test email",
+      text: "This is a test email sent by the sently MCP tool.",
     });
     await mailer.close();
     return result;

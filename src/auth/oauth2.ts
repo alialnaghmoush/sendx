@@ -5,7 +5,7 @@
  *
  * @example
  * ```ts
- * import { OAuth2Client } from "sendx/auth/oauth2";
+ * import { OAuth2Client } from "sently/auth/oauth2";
  * const client = new OAuth2Client({
  *   user: "me@gmail.com",
  *   clientId: "...",

@@ -82,7 +82,7 @@ describe("SMTPTransport", () => {
     });
 
     expect(result.accepted).toEqual(["recipient@example.com"]);
-    expect(result.messageId).toMatch(/^<.+@sendx>$/);
+    expect(result.messageId).toMatch(/^<.+@sently>$/);
 
     const dialog = adapter.commands.map((c) => decodeUtf8(c)).join("");
     expect(dialog).toContain("EHLO smtp.example.com");

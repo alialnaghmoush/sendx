@@ -1,10 +1,11 @@
 {
-  "name": "@alialnaghmoush/sendx",
+  "name": "@sently/sently",
   "version": "0.2.0",
   "description": "Runtime-agnostic email library for Node.js, Bun, Deno, and Cloudflare Workers",
   "license": "MIT",
   "publish": {
     "exclude": [
+      ".npm-cache/",
       ".cursor/",
       ".github/",
       "scripts/",

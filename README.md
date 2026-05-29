@@ -1,17 +1,17 @@
-# sendx
+# sently
 
 **Runtime-agnostic email library for Node.js, Bun, Deno, and Cloudflare Workers.**
 
-[![npm version](https://img.shields.io/npm/v/sendx.svg)](https://www.npmjs.com/package/sendx)
-[![JSR](https://jsr.io/badges/@alialnaghmoush/sendx)](https://jsr.io/@alialnaghmoush/sendx)
-[![bundle size](https://img.shields.io/bundlephobia/minzip/sendx)](https://bundlephobia.com/package/sendx)
-[![license](https://img.shields.io/npm/l/sendx.svg)](LICENSE)
+[![npm version](https://img.shields.io/npm/v/sently.svg)](https://www.npmjs.com/package/sently)
+[![JSR](https://jsr.io/badges/@sently/sently)](https://jsr.io/@sently/sently)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/sently)](https://bundlephobia.com/package/sently)
+[![license](https://img.shields.io/npm/l/sently.svg)](LICENSE)
 [![tests](https://img.shields.io/badge/tests-passing-brightgreen)](#)
 [![GitHub](https://img.shields.io/github/stars/alialnaghmoush/sendx?style=social&label=GitHub)](https://github.com/alialnaghmoush/sendx)
 
 ---
 
-## Why sendx
+## Why sently
 
 - **Works everywhere** — Node.js, Bun, Deno, Cloudflare Workers, and any environment with Web APIs
 - **True tree-shaking** — import only what you need; unused adapters and transports stay out of your bundle
@@ -25,24 +25,23 @@
 
 ## Installation
 
-**npm** ([sendx](https://www.npmjs.com/package/sendx)):
+**npm** ([sently](https://www.npmjs.com/package/sently)):
 
 ```bash
-bun add sendx
-npm install sendx
-pnpm add sendx
+bun add sently
+npm install sently
+pnpm add sently
 ```
 
-**JSR** ([@alialnaghmoush/sendx](https://jsr.io/@alialnaghmoush/sendx)) — Deno, Bun, and other JSR-aware runtimes:
+**JSR** ([@sently/sently](https://jsr.io/@sently/sently)) — Deno, Bun, and other JSR-aware runtimes:
 
 ```bash
-deno add jsr:@alialnaghmoush/sendx
-bunx jsr add @alialnaghmoush/sendx
+deno add jsr:@sently/sently
+bunx jsr add @sently/sently
 ```
 
 ```typescript
-// JSR import path
-import { createMailer } from "@alialnaghmoush/sendx";
+import { createMailer } from "sently";
 ```
 
 ---
@@ -52,7 +51,7 @@ import { createMailer } from "@alialnaghmoush/sendx";
 ### SMTP with auto-detected adapter
 
 ```typescript
-import { createMailer } from "sendx";
+import { createMailer } from "sently";
 
 const mailer = await createMailer({
   host: "smtp.example.com",
@@ -63,7 +62,7 @@ const mailer = await createMailer({
 await mailer.send({
   from: "you@example.com",
   to: "recipient@example.com",
-  subject: "Hello from sendx",
+  subject: "Hello from sently",
   text: "Plain text body",
   html: "<p>HTML body</p>",
 });
@@ -74,8 +73,8 @@ await mailer.close();
 ### Resend HTTP transport (Vercel Edge compatible)
 
 ```typescript
-import { createMailer } from "sendx";
-import { ResendTransport } from "sendx/transports/resend";
+import { createMailer } from "sently";
+import { ResendTransport } from "sently/transports/resend";
 
 const mailer = await createMailer({
   transport: new ResendTransport({ apiKey: process.env.RESEND_API_KEY! }),
@@ -85,15 +84,15 @@ await mailer.send({
   from: "onboarding@yourdomain.com",
   to: "recipient@example.com",
   subject: "Hello from the edge",
-  html: "<p>Sent via Resend + sendx</p>",
+  html: "<p>Sent via Resend + sently</p>",
 });
 ```
 
 ### Cloudflare Worker
 
 ```typescript
-import { createMailer } from "sendx";
-import { CloudflareAdapter } from "sendx/adapters/cf";
+import { createMailer } from "sently";
+import { CloudflareAdapter } from "sently/adapters/cf";
 
 export default {
   async fetch() {
@@ -123,14 +122,14 @@ export default {
 | Runtime | Import | Notes |
 |---------|--------|-------|
 | Node.js (auto) | `createMailer(config)` | Auto-detected |
-| Node.js (explicit) | `sendx/adapters/node` → `NodeAdapter` | Reference implementation |
+| Node.js (explicit) | `sently/adapters/node` → `NodeAdapter` | Reference implementation |
 | Bun (auto) | `createMailer(config)` | Auto-detected |
-| Bun (explicit) | `sendx/adapters/bun` → `BunAdapter` | Node compat layer |
-| Deno | `sendx/adapters/deno` → `DenoAdapter` | Native `Deno.startTls` |
-| Cloudflare Workers | `sendx/adapters/cf` → `CloudflareAdapter` | `cloudflare:sockets` |
+| Bun (explicit) | `sently/adapters/bun` → `BunAdapter` | Node compat layer |
+| Deno | `sently/adapters/deno` → `DenoAdapter` | Native `Deno.startTls` |
+| Cloudflare Workers | `sently/adapters/cf` → `CloudflareAdapter` | `cloudflare:sockets` |
 
 ```typescript
-import { NodeAdapter } from "sendx/adapters/node";
+import { NodeAdapter } from "sently/adapters/node";
 
 const mailer = await createMailer({
   host: "smtp.example.com",
@@ -146,9 +145,9 @@ const mailer = await createMailer({
 ### SMTP
 
 ```typescript
-import { createMailer } from "sendx";
-import { SMTPTransport } from "sendx/transports/smtp";
-import { NodeAdapter } from "sendx/adapters/node";
+import { createMailer } from "sently";
+import { SMTPTransport } from "sently/transports/smtp";
+import { NodeAdapter } from "sently/adapters/node";
 
 const transport = new SMTPTransport({
   host: "smtp.example.com",
@@ -180,7 +179,7 @@ const mailer = await createMailer({
 #### Gmail OAuth2 (XOAUTH2)
 
 ```typescript
-import { OAuth2Client } from "sendx/auth/oauth2";
+import { OAuth2Client } from "sently/auth/oauth2";
 
 const mailer = await createMailer({
   host: "smtp.gmail.com",
@@ -216,7 +215,7 @@ const mailer = await createMailer({
 Or use `SMTPPool` directly:
 
 ```typescript
-import { SMTPPool } from "sendx/pool";
+import { SMTPPool } from "sently/pool";
 
 const pool = new SMTPPool({
   host: "smtp.example.com",
@@ -230,7 +229,7 @@ const pool = new SMTPPool({
 #### Resend
 
 ```typescript
-import { ResendTransport } from "sendx/transports/resend";
+import { ResendTransport } from "sently/transports/resend";
 
 const transport = new ResendTransport({ apiKey: "re_..." });
 ```
@@ -238,7 +237,7 @@ const transport = new ResendTransport({ apiKey: "re_..." });
 #### SendGrid
 
 ```typescript
-import { SendGridTransport } from "sendx/transports/sendgrid";
+import { SendGridTransport } from "sently/transports/sendgrid";
 
 const transport = new SendGridTransport({ apiKey: "SG...." });
 ```
@@ -246,7 +245,7 @@ const transport = new SendGridTransport({ apiKey: "SG...." });
 #### Postmark
 
 ```typescript
-import { PostmarkTransport } from "sendx/transports/postmark";
+import { PostmarkTransport } from "sently/transports/postmark";
 
 const transport = new PostmarkTransport({ serverToken: "..." });
 ```
@@ -314,8 +313,8 @@ On Cloudflare Workers and browsers, use `content: Uint8Array` — `attachment.pa
 Each import path is a separate build entry point:
 
 ```
-import { createMailer } from "sendx"
-+ import { ResendTransport } from "sendx/transports/resend"
+import { createMailer } from "sently"
++ import { ResendTransport } from "sently/transports/resend"
 → Bundle: core/mime (~8KB) + core/address (~2KB) + transports/resend (~2KB) ≈ ~12KB gzip
 
 vs. full Nodemailer: ~220KB
@@ -327,13 +326,13 @@ Only code you import is bundled. Adapters and transports you never import are ne
 
 ## Migrating from Nodemailer
 
-| Nodemailer | sendx |
+| Nodemailer | sently |
 |------------|-------|
 | `nodemailer.createTransport({...})` | `await createMailer({...})` |
 | `transporter.sendMail(options)` | `mailer.send(options)` |
 | `transporter.verify()` | `mailer.verify()` |
 | `options.attachments[].path` | Same (Node/Bun/Deno); use `content` on edge |
-| `import nodemailer from 'nodemailer'` | `import { createMailer } from 'sendx'` |
+| `import nodemailer from 'nodemailer'` | `import { createMailer } from 'sently'` |
 | CommonJS | ESM only |
 | Node.js only | Node, Bun, Deno, CF Workers |
 
@@ -345,23 +344,23 @@ Approximate gzip sizes per subpath export:
 
 | Export | ~gzip |
 |--------|-------|
-| `sendx` | ~6 KB |
-| `sendx/transports/smtp` | ~10 KB |
-| `sendx/transports/resend` | ~2 KB |
-| `sendx/transports/sendgrid` | ~2 KB |
-| `sendx/transports/postmark` | ~2 KB |
-| `sendx/adapters/node` | ~3 KB |
-| `sendx/adapters/bun` | ~3 KB |
-| `sendx/adapters/deno` | ~2 KB |
-| `sendx/adapters/cf` | ~2 KB |
+| `sently` | ~6 KB |
+| `sently/transports/smtp` | ~10 KB |
+| `sently/transports/resend` | ~2 KB |
+| `sently/transports/sendgrid` | ~2 KB |
+| `sently/transports/postmark` | ~2 KB |
+| `sently/adapters/node` | ~3 KB |
+| `sently/adapters/bun` | ~3 KB |
+| `sently/adapters/deno` | ~2 KB |
+| `sently/adapters/cf` | ~2 KB |
 
 ---
 
 ## Links
 
 - **Source & issues:** [github.com/alialnaghmoush/sendx](https://github.com/alialnaghmoush/sendx)
-- **npm:** [npmjs.com/package/sendx](https://www.npmjs.com/package/sendx)
-- **JSR:** [jsr.io/@alialnaghmoush/sendx](https://jsr.io/@alialnaghmoush/sendx)
+- **npm:** [npmjs.com/package/sently](https://www.npmjs.com/package/sently)
+- **JSR:** [jsr.io/@sently/sently](https://jsr.io/@sently/sently)
 
 ## License
 

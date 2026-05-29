@@ -1,5 +1,5 @@
 {
-  "name": "sendx",
+  "name": "sently",
   "version": "0.2.0",
   "description": "Runtime-agnostic email library for Node.js, Bun, Deno, and Cloudflare Workers",
   "type": "module",
@@ -65,12 +65,16 @@
     "format": "biome format src --write",
     "typecheck": "tsc --noEmit",
     "mcp": "bun tools/mcp/index.ts",
-    "publish:dry": "bun scripts/publish.ts --dry-run",
-    "publish:release": "bun scripts/publish.ts",
-    "publish:npm": "bun scripts/publish.ts --npm",
-    "publish:npm:dry": "bun scripts/publish.ts --npm --dry-run",
-    "publish:jsr": "bun scripts/publish.ts --jsr",
-    "publish:jsr:dry": "bun scripts/publish.ts --jsr --dry-run"
+    "verify": "bun run lint && bun run typecheck && bun run build && bun test",
+    "prepack": "bun run verify",
+    "pack:npm": "npm pack --dry-run --cache ./.npm-cache",
+    "publish:npm-d": "npm publish --dry-run --cache ./.npm-cache",
+    "publish:npm": "npm publish --cache ./.npm-cache",
+    "publish:jsr-d": "npx jsr publish --dry-run",
+    "publish:jsr": "npx jsr publish",
+    "publish:all-d": "bun run publish:npm-d && bun run publish:jsr-d",
+    "publish:all": "bun run publish:npm && bun run publish:jsr",
+    "verify:publish": "bun run pack:npm"
   },
   "devDependencies": {
     "@biomejs/biome": "latest",

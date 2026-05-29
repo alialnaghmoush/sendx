@@ -4,9 +4,9 @@
  *
  * @example
  * ```ts
- * import { SMTPTransport } from "@alialnaghmoush/sendx/transports/smtp";
- * import { NodeAdapter } from "@alialnaghmoush/sendx/adapters/node";
- * import { createMailer } from "@alialnaghmoush/sendx";
+ * import { SMTPTransport } from "sently/transports/smtp";
+ * import { NodeAdapter } from "sently/adapters/node";
+ * import { createMailer } from "sently";
  *
  * const mailer = await createMailer({
  *   transport: new SMTPTransport({

@@ -213,13 +213,13 @@ function assembleMultipart(boundary: string, parts: string[]): string {
 function generateMessageId(): string {
   const random = crypto.getRandomValues(new Uint8Array(8));
   const hex = Array.from(random, (b) => b.toString(16).padStart(2, "0")).join("");
-  return `<${Date.now()}.${hex}@sendx>`;
+  return `<${Date.now()}.${hex}@sently>`;
 }
 
 function generateBoundary(): string {
   const random = crypto.getRandomValues(new Uint8Array(12));
   const hex = Array.from(random, (b) => b.toString(16).padStart(2, "0")).join("");
-  return `----sendx_${hex}`;
+  return `----sently_${hex}`;
 }
 
 function foldHeader(name: string, value: string): string {

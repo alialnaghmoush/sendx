@@ -19,13 +19,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
-      - run: bun test
-      - run: bun run build
+      - run: bun run verify
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
           registry-url: "https://registry.npmjs.org"
-      - run: npm publish --provenance --access public
+      - run: npm publish --provenance --cache ./.npm-cache
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -38,5 +37,5 @@ jobs:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
-      - run: bun test
-      - run: npx jsr publish
+      - run: bun run verify
+      - run: bunx jsr publish

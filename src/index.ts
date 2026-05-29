@@ -4,7 +4,7 @@
  *
  * @example
  * ```ts
- * import { createMailer } from "@alialnaghmoush/sendx";
+ * import { createMailer } from "sently";
  *
  * const mailer = await createMailer({
  *   host: "smtp.example.com",

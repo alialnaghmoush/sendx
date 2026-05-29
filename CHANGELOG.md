@@ -12,6 +12,7 @@
 
 ### Changed
 
+- npm package name is `sently`; JSR package name is `@sently/sently`
 - `SMTPAuth.pass` is now optional (was required in v0.1)
 - `buildMIME()` is now `async` when DKIM config is provided
 - `selectAuthMethod` priority: XOAUTH2 > CRAM-MD5 > LOGIN > PLAIN

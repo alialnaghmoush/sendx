@@ -6,7 +6,7 @@
  *
  * @example
  * ```ts
- * import { signDKIM } from "sendx/core/dkim";
+ * import { signDKIM } from "sently/core/dkim";
  * const signed = await signDKIM(rawMessage, {
  *   domainName: "example.com",
  *   keySelector: "2024",

@@ -4,8 +4,8 @@
  *
  * @example
  * ```ts
- * import { PostmarkTransport } from "@alialnaghmoush/sendx/transports/postmark";
- * import { createMailer } from "@alialnaghmoush/sendx";
+ * import { PostmarkTransport } from "sently/transports/postmark";
+ * import { createMailer } from "sently";
  *
  * const mailer = await createMailer({
  *   transport: new PostmarkTransport({ serverToken: process.env.POSTMARK_TOKEN! }),

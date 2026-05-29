@@ -6,7 +6,7 @@
  *
  * @example
  * ```ts
- * import { computeCRAMMD5 } from "sendx/core/cram-md5";
+ * import { computeCRAMMD5 } from "sently/core/cram-md5";
  * const response = await computeCRAMMD5("<challenge>", "user", "pass");
  * ```
  */

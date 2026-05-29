@@ -4,8 +4,8 @@
  *
  * @example
  * ```ts
- * import { ResendTransport } from "@alialnaghmoush/sendx/transports/resend";
- * import { createMailer } from "@alialnaghmoush/sendx";
+ * import { ResendTransport } from "sently/transports/resend";
+ * import { createMailer } from "sently";
  *
  * const mailer = await createMailer({
  *   transport: new ResendTransport({ apiKey: process.env.RESEND_API_KEY! }),
