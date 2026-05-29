@@ -1,5 +1,5 @@
 {
-  "name": "@sently/sently",
+  "name": "@alialnaghmoush/sently",
   "version": "0.2.0",
   "description": "Runtime-agnostic email library for Node.js, Bun, Deno, and Cloudflare Workers",
   "license": "MIT",
