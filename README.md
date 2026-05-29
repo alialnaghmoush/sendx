@@ -7,7 +7,7 @@
 [![bundle size](https://img.shields.io/bundlephobia/minzip/sently)](https://bundlephobia.com/package/sently)
 [![license](https://img.shields.io/npm/l/sently.svg)](LICENSE)
 [![tests](https://img.shields.io/badge/tests-passing-brightgreen)](#)
-[![GitHub](https://img.shields.io/github/stars/alialnaghmoush/sendx?style=social&label=GitHub)](https://github.com/alialnaghmoush/sendx)
+[![GitHub](https://img.shields.io/github/stars/alialnaghmoush/sently?style=social&label=GitHub)](https://github.com/alialnaghmoush/sently)
 
 ---
 
@@ -358,7 +358,7 @@ Approximate gzip sizes per subpath export:
 
 ## Links
 
-- **Source & issues:** [github.com/alialnaghmoush/sendx](https://github.com/alialnaghmoush/sendx)
+- **Source & issues:** [github.com/alialnaghmoush/sently](https://github.com/alialnaghmoush/sently)
 - **npm:** [npmjs.com/package/sently](https://www.npmjs.com/package/sently)
 - **JSR:** [jsr.io/@sently/sently](https://jsr.io/@sently/sently)
 

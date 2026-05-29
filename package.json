@@ -4,52 +4,6 @@
   "description": "Runtime-agnostic email library for Node.js, Bun, Deno, and Cloudflare Workers",
   "type": "module",
   "sideEffects": false,
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    },
-    "./adapters/node": {
-      "import": "./dist/adapters/node.js",
-      "types": "./dist/adapters/node.d.ts"
-    },
-    "./adapters/bun": {
-      "import": "./dist/adapters/bun.js",
-      "types": "./dist/adapters/bun.d.ts"
-    },
-    "./adapters/deno": {
-      "import": "./dist/adapters/deno.js",
-      "types": "./dist/adapters/deno.d.ts"
-    },
-    "./adapters/cf": {
-      "import": "./dist/adapters/cf.js",
-      "types": "./dist/adapters/cf.d.ts"
-    },
-    "./transports/smtp": {
-      "import": "./dist/transports/smtp.js",
-      "types": "./dist/transports/smtp.d.ts"
-    },
-    "./transports/resend": {
-      "import": "./dist/transports/resend.js",
-      "types": "./dist/transports/resend.d.ts"
-    },
-    "./transports/sendgrid": {
-      "import": "./dist/transports/sendgrid.js",
-      "types": "./dist/transports/sendgrid.d.ts"
-    },
-    "./transports/postmark": {
-      "import": "./dist/transports/postmark.js",
-      "types": "./dist/transports/postmark.d.ts"
-    },
-    "./auth/oauth2": {
-      "import": "./dist/auth/oauth2.js",
-      "types": "./dist/auth/oauth2.d.ts"
-    },
-    "./pool": {
-      "import": "./dist/pool/pool.js",
-      "types": "./dist/pool/pool.d.ts"
-    }
-  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": ["dist", "README.md"],
@@ -96,10 +50,56 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/alialnaghmoush/sendx.git"
+    "url": "git+https://github.com/alialnaghmoush/sently.git"
   },
   "homepage": "https://github.com/alialnaghmoush/sendx#readme",
   "bugs": {
     "url": "https://github.com/alialnaghmoush/sendx/issues"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./adapters/node": {
+      "import": "./dist/adapters/node.js",
+      "types": "./dist/adapters/node.d.ts"
+    },
+    "./adapters/bun": {
+      "import": "./dist/adapters/bun.js",
+      "types": "./dist/adapters/bun.d.ts"
+    },
+    "./adapters/deno": {
+      "import": "./dist/adapters/deno.js",
+      "types": "./dist/adapters/deno.d.ts"
+    },
+    "./adapters/cf": {
+      "import": "./dist/adapters/cf.js",
+      "types": "./dist/adapters/cf.d.ts"
+    },
+    "./transports/smtp": {
+      "import": "./dist/transports/smtp.js",
+      "types": "./dist/transports/smtp.d.ts"
+    },
+    "./transports/resend": {
+      "import": "./dist/transports/resend.js",
+      "types": "./dist/transports/resend.d.ts"
+    },
+    "./transports/sendgrid": {
+      "import": "./dist/transports/sendgrid.js",
+      "types": "./dist/transports/sendgrid.d.ts"
+    },
+    "./transports/postmark": {
+      "import": "./dist/transports/postmark.js",
+      "types": "./dist/transports/postmark.d.ts"
+    },
+    "./auth/oauth2": {
+      "import": "./dist/auth/oauth2.js",
+      "types": "./dist/auth/oauth2.d.ts"
+    },
+    "./pool": {
+      "import": "./dist/pool/pool.js",
+      "types": "./dist/pool/pool.d.ts"
+    }
   }
 }
