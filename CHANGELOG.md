@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.4.1] — 2026-05-30
+
+### Fixed
+
+- CI: use locally installed tsc (node_modules/.bin/tsc) in build.ts
+  instead of bunx tsc to avoid runtime npm downloads in CI
+- CI: add bun run build step to SMTP integration job so dist/ exists
+  before the integration test imports from 'sently'
+- CI: improved smoke test error output with explicit .catch() handler
+- CI: added FORCE_JAVASCRIPT_ACTIONS_TO_NODE24 to all workflow jobs
+
 ## [0.4.0] — 2026-05-30
 
 ### Added

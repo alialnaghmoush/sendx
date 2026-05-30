@@ -42,6 +42,8 @@ await build({
   ],
 })
 
-execSync('bunx tsc --emitDeclarationOnly --outDir dist', { stdio: 'inherit' })
+execSync('./node_modules/.bin/tsc --emitDeclarationOnly --outDir dist', {
+  stdio: 'inherit',
+})
 
 console.log('✓ sently built successfully')

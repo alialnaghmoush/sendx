@@ -10,6 +10,8 @@ jobs:
   test-bun:
     name: Unit tests (Bun)
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -21,6 +23,8 @@ jobs:
   test-node:
     name: Smoke test (Node.js)
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -29,11 +33,24 @@ jobs:
           node-version: "22"
       - run: bun install --frozen-lockfile
       - run: bun run build
-      - run: node -e "import('./dist/index.js').then(m => { console.log('exports ok:', Object.keys(m).join(', ')); process.exit(0) })"
+      - run: |
+          node -e "
+            import('./dist/index.js')
+              .then(m => {
+                console.log('exports ok:', Object.keys(m).join(', '));
+                process.exit(0);
+              })
+              .catch(err => {
+                console.error('import failed:', err.message);
+                process.exit(1);
+              });
+          "
 
   test-integration:
     name: SMTP integration (Mailpit)
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     services:
       mailpit:
         image: axllent/mailpit
@@ -44,4 +61,5 @@ jobs:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
+      - run: bun run build
       - run: bun run tests/integration/smtp.integration.ts
