@@ -1,18 +1,5 @@
 /**
- * @module
- * DKIM (DomainKeys Identified Mail) signing per RFC 6376.
- * Supports RSA-SHA256 and Ed25519-SHA256 using Web Crypto.
- * Ed25519 requires Node.js ≥ 18.4, Bun ≥ 1.0, or Cloudflare Workers.
- *
- * @example
- * ```ts
- * import { signDKIM } from "sently/core/dkim";
- * const signed = await signDKIM(rawMessage, {
- *   domainName: "example.com",
- *   keySelector: "2024",
- *   privateKey: "-----BEGIN PRIVATE KEY-----\\n...",
- * });
- * ```
+ * DKIM signing implementation (RFC 6376). Public entry: `sently/dkim`.
  */
 import { encodeBase64, encodeUtf8 } from "./base64.js";
 import type { DKIMConfig } from "./types.js";

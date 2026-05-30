@@ -1,9 +1,10 @@
 import { execSync } from 'node:child_process'
-import { writeFileSync } from 'node:fs'
 import { build } from 'bun'
 
 const entrypoints = [
   'src/detect.ts',
+  'src/mailer.ts',
+  'src/dkim.ts',
   'src/core/smtp.ts',
   'src/adapters/node.ts',
   'src/adapters/bun.ts',
@@ -31,7 +32,7 @@ await build({
   format: 'esm',
   splitting: true,
   sourcemap: 'external',
-  minify: false,
+  minify: true,
   external: [
     'node:net',
     'node:tls',
@@ -48,24 +49,6 @@ execSync('./node_modules/.bin/tsc --emitDeclarationOnly --outDir dist', {
   stdio: 'inherit',
 })
 
-// Bun's code-splitting barrel for src/index.ts emits broken re-exports; write the entry manually.
-writeFileSync(
-  './dist/index.js',
-  `export { GOOGLE_TOKEN_URL, MICROSOFT_TOKEN_URL, OAuth2Client } from "./auth/oauth2.js";
-export { SMTPError } from "./core/smtp.js";
-export { createMailer, detectRuntime } from "./detect.js";
-export { simpleEngine, templatePlugin } from "./plugins/template.js";
-export { SMTPPool } from "./pool/pool.js";
-export { BrevoError, BrevoTransport } from "./transports/brevo.js";
-export { MailgunError, MailgunTransport } from "./transports/mailgun.js";
-export { PostmarkError, PostmarkTransport } from "./transports/postmark.js";
-export { PreviewTransport } from "./transports/preview.js";
-export { ResendError, ResendTransport } from "./transports/resend.js";
-export { RetryTransport } from "./transports/retry.js";
-export { SendGridError, SendGridTransport } from "./transports/sendgrid.js";
-export { SESError, SESTransport } from "./transports/ses.js";
-export { SMTPTransport } from "./transports/smtp.js";
-`,
-)
+execSync('bun scripts/generate-index-js.ts', { stdio: 'inherit' })
 
 console.log('✓ sently built successfully')

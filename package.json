@@ -1,6 +1,6 @@
 {
   "name": "sently",
-  "version": "0.4.6",
+  "version": "0.4.7",
   "description": "Runtime-agnostic email library for Node.js, Bun, Deno, and Cloudflare Workers. ESM-native Nodemailer alternative with zero dependencies.",
   "type": "module",
   "sideEffects": false,
@@ -33,13 +33,16 @@
     "publish:jsr": "npx jsr publish",
     "publish:all-d": "bun run publish:npm-d && bun run publish:jsr-d",
     "publish:all": "bun run publish:npm && bun run publish:jsr",
-    "verify:publish": "bun run pack:npm"
+    "verify:publish": "bun run pack:npm",
+    "measure:size": "bun tools/measure-bundle-size.ts",
+    "measure:size:md": "bun tools/measure-bundle-size.ts --markdown",
+    "check:size": "bun tools/measure-bundle-size.ts --check"
   },
   "devDependencies": {
-    "@biomejs/biome": "latest",
-    "@modelcontextprotocol/sdk": "^1.29.0",
-    "@types/node": "^25.9.1",
-    "typescript": "latest"
+    "@biomejs/biome": "2.4.16",
+    "@modelcontextprotocol/sdk": "1.29.0",
+    "@types/node": "25.9.1",
+    "typescript": "6.0.3"
   },
   "keywords": [
     "email",
@@ -146,6 +149,14 @@
     "./pool": {
       "import": "./dist/pool/pool.js",
       "types": "./dist/pool/pool.d.ts"
+    },
+    "./mailer": {
+      "import": "./dist/mailer.js",
+      "types": "./dist/mailer.d.ts"
+    },
+    "./dkim": {
+      "import": "./dist/dkim.js",
+      "types": "./dist/dkim.d.ts"
     }
   }
 }

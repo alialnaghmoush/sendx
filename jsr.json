@@ -1,6 +1,6 @@
 {
   "name": "@alialnaghmoush/sently",
-  "version": "0.4.6",
+  "version": "0.4.7",
   "description": "Runtime-agnostic email library for Node.js, Bun, Deno, and Cloudflare Workers",
   "license": "MIT",
   "publish": {
@@ -40,6 +40,8 @@
     "./transports/retry": "./src/transports/retry.ts",
     "./plugins/template": "./src/plugins/template.ts",
     "./auth/oauth2": "./src/auth/oauth2.ts",
-    "./pool": "./src/pool/pool.ts"
+    "./pool": "./src/pool/pool.ts",
+    "./mailer": "./src/mailer.ts",
+    "./dkim": "./src/dkim.ts"
   }
 }

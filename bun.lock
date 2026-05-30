@@ -5,10 +5,10 @@
     "": {
       "name": "sendx",
       "devDependencies": {
-        "@biomejs/biome": "latest",
-        "@modelcontextprotocol/sdk": "^1.29.0",
-        "@types/node": "^25.9.1",
-        "typescript": "latest",
+        "@biomejs/biome": "2.4.16",
+        "@modelcontextprotocol/sdk": "1.29.0",
+        "@types/node": "25.9.1",
+        "typescript": "6.0.3",
       },
     },
   },

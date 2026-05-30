@@ -1,22 +1,13 @@
 // src/detect.ts
-import { runPlugins } from "./core/plugin.js";
 import type {
-  BulkSendOptions,
-  BulkSendResult,
   CreateMailerOptions,
   Mailer,
-  MailOptions,
-  MailPlugin,
   Runtime,
-  SendResult,
   SMTPConfig,
   SocketAdapter,
   TLSOptions,
-  Transport,
-  VerifyResult,
 } from "./core/types.js";
-import { SMTPPool } from "./pool/pool.js";
-import { SMTPTransport } from "./transports/smtp.js";
+import { createMailer as createTransportMailer, MailerImpl } from "./mailer.js";
 
 /** Detect the current JavaScript runtime. */
 export function detectRuntime(): Runtime {
@@ -72,140 +63,41 @@ export async function createDefaultAdapter(options?: {
 
 /**
  * Create a ready-to-use Mailer instance.
+ *
+ * For HTTP transports and smallest bundles, prefer `import { createMailer } from "sently/mailer"`.
  */
 export async function createMailer(options: CreateMailerOptions): Promise<Mailer> {
   if ("transport" in options) {
-    return new MailerImpl(options.transport, options.plugins ?? []);
+    return createTransportMailer({
+      transport: options.transport,
+      ...(options.plugins !== undefined ? { plugins: options.plugins } : {}),
+    });
   }
 
   const smtpConfig = options as SMTPConfig;
+  const adapterOptions = {
+    ...(smtpConfig.secure !== undefined ? { secure: smtpConfig.secure } : {}),
+    ...(smtpConfig.connectionTimeout !== undefined
+      ? { connectionTimeout: smtpConfig.connectionTimeout }
+      : {}),
+    ...(smtpConfig.tls !== undefined ? { tls: smtpConfig.tls } : {}),
+  };
 
   if (smtpConfig.pool) {
+    const { SMTPPool } = await import("./pool/pool.js");
     return new MailerImpl(
       new SMTPPool(smtpConfig, {
         createAdapter: async () =>
-          smtpConfig.adapter ??
-          (await createDefaultAdapter({
-            ...(smtpConfig.secure !== undefined ? { secure: smtpConfig.secure } : {}),
-            ...(smtpConfig.connectionTimeout !== undefined
-              ? { connectionTimeout: smtpConfig.connectionTimeout }
-              : {}),
-            ...(smtpConfig.tls !== undefined ? { tls: smtpConfig.tls } : {}),
-          })),
+          smtpConfig.adapter ?? (await createDefaultAdapter(adapterOptions)),
       }),
       smtpConfig.plugins,
     );
   }
 
-  const adapter =
-    smtpConfig.adapter ??
-    (await createDefaultAdapter({
-      ...(smtpConfig.secure !== undefined ? { secure: smtpConfig.secure } : {}),
-      ...(smtpConfig.connectionTimeout !== undefined
-        ? { connectionTimeout: smtpConfig.connectionTimeout }
-        : {}),
-      ...(smtpConfig.tls !== undefined ? { tls: smtpConfig.tls } : {}),
-    }));
+  const adapter = smtpConfig.adapter ?? (await createDefaultAdapter(adapterOptions));
+  const { SMTPTransport } = await import("./transports/smtp.js");
 
   return new MailerImpl(new SMTPTransport({ ...smtpConfig, adapter }), smtpConfig.plugins);
-}
-
-class MailerImpl implements Mailer {
-  constructor(
-    private readonly transport: Transport,
-    private readonly plugins: MailPlugin[] = [],
-  ) {}
-
-  async send(options: MailOptions): Promise<SendResult> {
-    const processed = await runPlugins(options, this.plugins);
-    return this.transport.send(processed);
-  }
-
-  async sendBulk(messages: MailOptions[], options?: BulkSendOptions): Promise<BulkSendResult> {
-    const concurrency = options?.concurrency ?? 1;
-    const results: BulkSendResult["results"] = new Array(messages.length);
-    const queue = [...messages.entries()];
-    let active = 0;
-
-    await new Promise<void>((resolve) => {
-      if (messages.length === 0) {
-        resolve();
-        return;
-      }
-
-      const maybeDone = (): void => {
-        if (queue.length === 0 && active === 0) {
-          resolve();
-        }
-      };
-
-      const processNext = (): void => {
-        if (queue.length === 0) {
-          maybeDone();
-          return;
-        }
-
-        const entry = queue.shift();
-        if (entry === undefined) {
-          maybeDone();
-          return;
-        }
-
-        const [index, message] = entry;
-        active++;
-
-        void this.send(message)
-          .then((result) => {
-            results[index] = { status: "sent", result };
-            options?.onSuccess?.(message, index, result);
-          })
-          .catch((error: unknown) => {
-            results[index] = { status: "failed", error };
-            options?.onError?.(message, index, error);
-          })
-          .finally(() => {
-            active--;
-            processNext();
-            maybeDone();
-          });
-      };
-
-      for (let i = 0; i < concurrency; i++) {
-        processNext();
-      }
-    });
-
-    let sent = 0;
-    let failed = 0;
-    for (const result of results) {
-      if (result.status === "sent") {
-        sent++;
-      } else {
-        failed++;
-      }
-    }
-
-    return {
-      total: messages.length,
-      sent,
-      failed,
-      results,
-    };
-  }
-
-  verify(): Promise<VerifyResult> {
-    if (this.transport.verify) {
-      return this.transport.verify();
-    }
-    return Promise.resolve({ ok: true, provider: "mailer" });
-  }
-
-  close(): Promise<void> {
-    if (this.transport.close) {
-      return this.transport.close();
-    }
-    return Promise.resolve();
-  }
 }
 
 declare const Bun: unknown;

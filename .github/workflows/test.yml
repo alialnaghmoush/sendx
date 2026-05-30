@@ -34,6 +34,29 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run build
       - run: node scripts/smoke.mjs
+      - run: bun scripts/smoke-cf.ts
+
+  test-deno:
+    name: Smoke test (Deno)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: oven-sh/setup-bun@v2
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - run: deno run --allow-read scripts/smoke-deno.ts
+
+  test-bundle-size:
+    name: Bundle size budgets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun run check:size
 
   test-integration:
     name: SMTP integration (Mailpit)

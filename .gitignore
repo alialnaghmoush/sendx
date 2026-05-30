@@ -29,6 +29,8 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 .eslintcache
 .cache
 .npm-cache
+.tmp-size
+.tmp-index-test
 *.tsbuildinfo
 
 # IntelliJ based IDEs

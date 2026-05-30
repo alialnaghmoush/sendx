@@ -1,0 +1,18 @@
+{
+  "stack: http-resend": 4800,
+  "sently + ResendTransport": 15000,
+  "sently/mailer": 800,
+  "sently (createMailer)": 14500,
+  "sently/transports/smtp": 11000,
+  "sently/transports/resend": 4500,
+  "sently/transports/sendgrid": 4500,
+  "sently/transports/postmark": 4500,
+  "sently/transports/mailgun": 4500,
+  "sently/transports/ses": 8000,
+  "sently/transports/brevo": 4500,
+  "sently/transports/preview": 6600,
+  "sently/adapters/node": 1500,
+  "sently/adapters/bun": 1500,
+  "sently/adapters/deno": 800,
+  "sently/adapters/cf": 800
+}

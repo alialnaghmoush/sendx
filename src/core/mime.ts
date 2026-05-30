@@ -7,7 +7,6 @@ import {
   toMIMEHeader,
 } from "./address.js";
 import { encodeBase64, encodeHeader, encodeUtf8 } from "./base64.js";
-import { signDKIM } from "./dkim.js";
 import type { Address, Attachment, DKIMConfig, Envelope, MailOptions } from "./types.js";
 
 function sanitizeHeaderValue(value: string): string {
@@ -155,6 +154,7 @@ export async function buildMIME(options: MailOptions, dkim?: DKIMConfig): Promis
   let raw = encodeUtf8(rawText);
 
   if (dkim) {
+    const { signDKIM } = await import("../dkim.js");
     const { header } = await signDKIM(raw, dkim);
     const signedText = `${header}${CRLF}${rawText}`;
     raw = encodeUtf8(signedText);

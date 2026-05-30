@@ -1,5 +1,40 @@
 # Changelog
 
+## [Unreleased]
+
+## [0.4.7] — 2026-05-30
+
+### Added
+
+- **`sently/mailer` entry** — transport-only `createMailer` without SMTP code in the
+  bundle (~4.3 KB with HTTP transports vs ~14 KB from the main entry)
+- **`sently/dkim` entry** — optional DKIM signing; MIME lazy-loads it only when
+  `dkim` config is passed (~1.7 KB)
+- **`TransportMailerOptions`** type for the `sently/mailer` entry
+- **Bundle size CI gate** — `bun run check:size` enforces gzip budgets in
+  `tools/bundle-size-budgets.json`
+- **`bun run measure:size`** / **`measure:size:md`** — categorized bundle reports
+  for docs and CI
+- **Deno and Cloudflare adapter smoke tests** in CI
+
+### Changed
+
+- Lazy-load SMTP transport and pool from `createMailer` when using SMTP config
+- Extract `MailerImpl` to `src/mailer.ts`; full `createMailer` in `detect.ts` delegates
+  to it for custom transports
+- **`dist/index.js` generated from `src/index.ts`** via `scripts/generate-index-js.ts`
+  (no hand-maintained export list)
+- **Minified `dist/` output** in production builds
+- **Pinned devDependency versions** (Biome 2.4.16, TypeScript 6.0.3, `@types/node`
+  25.9.1, MCP SDK 1.29.0)
+
+### Documentation
+
+- README **Bundle Size** section — import-path guide, common stacks, per-subpath
+  tables, and HTTP stack breakdown
+- Inline JSDoc on `src/index.ts` barrel re-exports for JSR symbol documentation
+- Corrected bundle size figures (minified + gzip, one decimal KB)
+
 ## [0.4.6] — 2026-05-30
 
 ### Documentation

@@ -364,6 +364,14 @@ export interface PreviewConfig {
 
 // ─── createMailer Options ─────────────────────────────────
 
+/** Options for {@link createMailer} from `sently/mailer` — transport-only, smallest bundle. */
+export interface TransportMailerOptions {
+  /** Transport that sends the message (HTTP API, SMTP wrapper, preview, etc.). */
+  transport: Transport;
+  /** Optional plugins run before each send. */
+  plugins?: MailPlugin[];
+}
+
 /** Options for {@link createMailer} — custom transport or SMTP config. */
 export type CreateMailerOptions =
   | ({ transport: Transport; plugins?: MailPlugin[] } & Partial<SMTPConfig>)

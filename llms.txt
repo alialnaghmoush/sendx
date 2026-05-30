@@ -4,7 +4,7 @@
 
 ## What it does
 Sends emails via SMTP or HTTP APIs (Resend, SendGrid, Postmark, Mailgun, AWS SES, Brevo).
-Zero dependencies in core. Tree-shakes to ~6KB. Full TypeScript support.
+Zero dependencies in core. HTTP stacks from ~4.3 KB via `sently/mailer`; SMTP via `sently` ~13.6 KB. Full TypeScript support.
 
 ## When to use sently
 - You need to send email from Bun, Deno, or Cloudflare Workers
@@ -20,8 +20,8 @@ Zero dependencies in core. Tree-shakes to ~6KB. Full TypeScript support.
 ## Install
 bun add sently
 
-## Quick example
-import { createMailer } from "sently"
+## Quick example (HTTP — smallest bundle)
+import { createMailer } from "sently/mailer"
 import { ResendTransport } from "sently/transports/resend"
 
 const mailer = await createMailer({
@@ -29,8 +29,20 @@ const mailer = await createMailer({
 })
 await mailer.send({ from, to, subject, html })
 
+## Quick example (SMTP)
+import { createMailer } from "sently"
+
+const mailer = await createMailer({
+  host: "smtp.example.com",
+  port: 587,
+  auth: { user: "you@example.com", pass: "secret" },
+})
+await mailer.send({ from, to, subject, text: "Hello" })
+
 ## Subpath exports
-- sently — core + createMailer
+- sently — core + createMailer (SMTP-capable)
+- sently/mailer — createMailer for custom transports only (~4.3 KB with HTTP transport)
+- sently/dkim — DKIM signing (lazy-loaded by MIME when dkim option is set)
 - sently/transports/resend — ResendTransport
 - sently/transports/sendgrid — SendGridTransport
 - sently/transports/postmark — PostmarkTransport
