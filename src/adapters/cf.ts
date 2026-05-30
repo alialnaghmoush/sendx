@@ -31,8 +31,11 @@ type CFConnect = (
 
 /** Configuration options for {@link CloudflareAdapter}. */
 export interface CloudflareAdapterOptions {
+  /** Use implicit TLS on connect (secureTransport: "on"). Default: false. */
   secure?: boolean;
+  /** Enable STARTTLS upgrade after plain connect. Default: true when not secure. */
   starttls?: boolean;
+  /** Reserved for future TLS tuning (Workers sockets API). */
   tls?: TLSOptions;
 }
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.5] — 2026-05-30
+
+### Documentation
+
+- Added `@module` documentation to the `./pool` entrypoint
+- Documented exported interface properties and public API methods across
+  core types, adapters, and transports to meet JSR symbol documentation
+  requirements (80%+ threshold)
+
 ## [0.4.4] — 2026-05-30
 
 ### Security

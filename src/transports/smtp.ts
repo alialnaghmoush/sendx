@@ -119,17 +119,29 @@ export class SMTPTransport implements Transport {
 
 /** Resolved SMTP transport configuration with defaults applied. */
 export interface ResolvedSMTPConfig {
+  /** SMTP server hostname. */
   host: string;
+  /** SMTP port with secure/default applied. */
   port: number;
+  /** Whether implicit TLS is used. */
   secure: boolean;
+  /** Resolved authentication credentials, if any. */
   auth?: SMTPConfig["auth"];
+  /** Whether AUTH requires an encrypted connection. */
   requireTLS?: boolean;
+  /** TLS options for STARTTLS and direct TLS. */
   tls?: SMTPConfig["tls"];
+  /** DKIM signing configuration. */
   dkim?: SMTPConfig["dkim"];
+  /** Socket connect timeout in milliseconds. */
   connectionTimeout?: number;
+  /** Timeout waiting for the SMTP greeting in milliseconds. */
   greetingTimeout?: number;
+  /** Idle socket timeout in milliseconds. */
   socketTimeout?: number;
+  /** Direct-to-MX delivery mode. */
   direct?: boolean;
+  /** Runtime socket adapter. */
   adapter?: SocketAdapter;
 }
 

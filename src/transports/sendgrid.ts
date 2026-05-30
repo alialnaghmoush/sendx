@@ -26,6 +26,7 @@ import { resolveAttachments } from "./resolve-attachments.js";
 
 /** SendGrid API configuration. */
 export interface SendGridConfig {
+  /** SendGrid API key (Bearer token). */
   apiKey: string;
 }
 

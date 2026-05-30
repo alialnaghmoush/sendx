@@ -26,8 +26,11 @@ export const MICROSOFT_TOKEN_URL = "https://login.microsoftonline.com/common/oau
 
 /** OAuth2 token endpoint response shape. */
 export interface TokenResponse {
+  /** Bearer access token for API or SMTP XOAUTH2. */
   access_token: string;
+  /** Token lifetime in seconds. */
   expires_in: number;
+  /** Token type (typically `"Bearer"`). */
   token_type: string;
 }
 

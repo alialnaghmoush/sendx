@@ -29,8 +29,11 @@ function warnRejectUnauthorizedDisabled(tls: TLSOptions): void {
 
 /** Configuration options for {@link NodeAdapter}. */
 export interface NodeAdapterOptions {
+  /** Use implicit TLS on connect (port 465). Default: false. */
   secure?: boolean;
+  /** Socket connect timeout in milliseconds. Default: 30_000. */
   connectionTimeout?: number;
+  /** TLS options passed to node:tls. */
   tls?: TLSOptions;
 }
 

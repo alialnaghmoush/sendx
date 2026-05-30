@@ -1,3 +1,28 @@
+/**
+ * @module
+ * SMTP connection pool with optional rate limiting.
+ *
+ * @example
+ * ```ts
+ * import { SMTPPool } from "sently/pool";
+ * import { NodeAdapter } from "sently/adapters/node";
+ *
+ * const pool = new SMTPPool({
+ *   host: "smtp.example.com",
+ *   auth: { user: "you@example.com", pass: "secret" },
+ *   adapter: new NodeAdapter(),
+ *   pool: true,
+ *   maxConnections: 5,
+ * });
+ *
+ * await pool.send({
+ *   from: "you@example.com",
+ *   to: "recipient@example.com",
+ *   subject: "Hello",
+ *   text: "Pooled send",
+ * });
+ * ```
+ */
 import type {
   MailOptions,
   PoolConfig,

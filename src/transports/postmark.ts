@@ -26,6 +26,7 @@ import { resolveAttachments } from "./resolve-attachments.js";
 
 /** Postmark API configuration. */
 export interface PostmarkConfig {
+  /** Postmark server API token. */
   serverToken: string;
 }
 

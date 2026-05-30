@@ -26,7 +26,9 @@ import { resolveAttachments } from "./resolve-attachments.js";
 
 /** Resend API configuration. */
 export interface ResendConfig {
+  /** Resend API key (starts with `re_`). */
   apiKey: string;
+  /** API base URL. Default: `https://api.resend.com`. */
   baseUrl?: string;
 }
 

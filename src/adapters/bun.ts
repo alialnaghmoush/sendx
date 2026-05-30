@@ -31,8 +31,11 @@ declare const Bun: { version: string } | undefined;
 
 /** Configuration options for {@link BunAdapter}. */
 export interface BunAdapterOptions {
+  /** Use implicit TLS on connect (port 465). Default: false. */
   secure?: boolean;
+  /** Socket connect timeout in milliseconds. Default: 30_000. */
   connectionTimeout?: number;
+  /** TLS options passed to node:tls (Bun Node compat layer). */
   tls?: TLSOptions;
 }
 

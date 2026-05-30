@@ -4,7 +4,9 @@
 
 /** A single email address with optional display name. */
 export interface Address {
+  /** Optional display name shown before the email address. */
   name?: string;
+  /** Email address (RFC 5322 addr-spec). */
   address: string;
 }
 
@@ -15,13 +17,21 @@ export type AddressInput = string | Address | (string | Address)[];
 
 /** Email attachment (in-memory or file path on supported runtimes). */
 export interface Attachment {
+  /** Filename shown to the recipient. */
   filename: string;
+  /** In-memory attachment body as bytes or string. */
   content?: Uint8Array | string;
+  /** Filesystem path to read attachment from (Node.js / Bun only). */
   path?: string;
+  /** MIME content type. Defaults to `application/octet-stream`. */
   contentType?: string;
+  /** Content transfer encoding for the attachment part. */
   encoding?: "base64" | "7bit" | "8bit" | "binary" | "quoted-printable";
+  /** Content-ID for inline images referenced from HTML (`cid:` URLs). */
   contentId?: string;
+  /** When true, disposition is `inline` instead of `attachment`. */
   inline?: boolean;
+  /** Extra MIME headers for this attachment part. */
   headers?: Record<string, string>;
 }
 
@@ -29,19 +39,33 @@ export interface Attachment {
 
 /** Options for composing and sending an email message. */
 export interface MailOptions {
+  /** Sender address. */
   from: AddressInput;
+  /** Primary recipient(s). */
   to: AddressInput;
+  /** Carbon-copy recipient(s). */
   cc?: AddressInput;
+  /** Blind carbon-copy recipient(s). */
   bcc?: AddressInput;
+  /** Address used for replies (Reply-To header). */
   replyTo?: AddressInput;
+  /** Message subject line. */
   subject: string;
+  /** Plain-text body. */
   text?: string;
+  /** HTML body. */
   html?: string;
+  /** File or in-memory attachments. */
   attachments?: Attachment[];
+  /** Additional MIME headers merged into the message. */
   headers?: Record<string, string>;
+  /** Explicit Message-ID header value. */
   messageId?: string;
+  /** Date header value. Defaults to send time. */
   date?: Date;
+  /** Message priority hint for the Priority header. */
   priority?: "high" | "normal" | "low";
+  /** Character set for text parts. */
   encoding?: "utf-8" | "ascii";
   /** Template name registered with templatePlugin */
   template?: string;
@@ -53,10 +77,15 @@ export interface MailOptions {
 
 /** Result returned after a message is accepted for delivery. */
 export interface SendResult {
+  /** Assigned or generated Message-ID. */
   messageId: string;
+  /** Envelope recipients accepted by the server. */
   accepted: string[];
+  /** Envelope recipients rejected by the server. */
   rejected: string[];
+  /** Raw server response text (SMTP or HTTP). */
   response: string;
+  /** SMTP envelope used for delivery. */
   envelope: Envelope;
 }
 
@@ -64,7 +93,9 @@ export interface SendResult {
 
 /** SMTP envelope addresses (MAIL FROM / RCPT TO). */
 export interface Envelope {
+  /** Envelope sender (MAIL FROM). */
   from: string;
+  /** Envelope recipients (RCPT TO). */
   to: string[];
 }
 
@@ -72,12 +103,19 @@ export interface Envelope {
 
 /** Runtime-specific TCP/TLS socket abstraction for SMTP. */
 export interface SocketAdapter {
+  /** Connect to the SMTP host on the given port. */
   connect(host: string, port: number): Promise<void>;
+  /** Upgrade the connection to TLS (STARTTLS). */
   startTLS(options?: TLSOptions): Promise<void>;
+  /** Write raw bytes to the socket. */
   write(data: Uint8Array): Promise<void>;
+  /** Async iterator of bytes read from the socket. */
   read(): AsyncIterable<Uint8Array>;
+  /** Close the connection. */
   close(): Promise<void>;
+  /** Whether the connection is currently encrypted. */
   readonly secure: boolean;
+  /** Whether the socket is connected. */
   readonly connected: boolean;
 }
 
@@ -85,7 +123,9 @@ export interface SocketAdapter {
 
 /** TLS connection options for STARTTLS and direct TLS. */
 export interface TLSOptions {
+  /** Verify server certificate. Default: true. */
   rejectUnauthorized?: boolean;
+  /** SNI server name for certificate validation. */
   servername?: string;
   /** Minimum TLS version. Useful for legacy SMTP servers still on TLS 1.1. */
   minVersion?: "TLSv1" | "TLSv1.1" | "TLSv1.2" | "TLSv1.3";
@@ -95,7 +135,9 @@ export interface TLSOptions {
 
 /** Result returned by transport and mailer verify() calls. */
 export interface VerifyResult {
+  /** Whether connectivity and authentication succeeded. */
   ok: boolean;
+  /** Transport or provider identifier (e.g. `"smtp"`, `"resend"`). */
   provider: string;
   /** Human-readable status message from the provider */
   message?: string;
@@ -107,8 +149,11 @@ export interface VerifyResult {
 
 /** Pluggable mail delivery backend (SMTP, HTTP API, etc.). */
 export interface Transport {
+  /** Send a message through this transport. */
   send(options: MailOptions): Promise<SendResult>;
+  /** Test connectivity and credentials without sending mail. */
   verify?(): Promise<VerifyResult>;
+  /** Release resources held by the transport. */
   close?(): Promise<void>;
 }
 
@@ -192,9 +237,13 @@ export interface PoolConfig {
 
 /** Configuration for SMTP transport and relay connections. */
 export interface SMTPConfig extends PoolConfig {
+  /** SMTP server hostname or IP address. */
   host: string;
+  /** SMTP port. Defaults to 587 (STARTTLS) or 465 (direct TLS). */
   port?: number;
+  /** Use implicit TLS on connect (typically port 465). */
   secure?: boolean;
+  /** SMTP authentication credentials. */
   auth?: SMTPAuth;
   /**
    * Refuse to authenticate over a non-TLS connection.
@@ -203,12 +252,19 @@ export interface SMTPConfig extends PoolConfig {
    * MITM attacks. Default: true when auth is set, false otherwise.
    */
   requireTLS?: boolean;
+  /** TLS options for STARTTLS and direct TLS connections. */
   tls?: TLSOptions;
+  /** Socket connect timeout in milliseconds. */
   connectionTimeout?: number;
+  /** Timeout waiting for the SMTP greeting in milliseconds. */
   greetingTimeout?: number;
+  /** Idle socket timeout in milliseconds. */
   socketTimeout?: number;
+  /** Deliver directly to recipient MX (no relay). Requires adapter support. */
   direct?: boolean;
+  /** Runtime socket adapter for TCP/TLS I/O. */
   adapter?: SocketAdapter;
+  /** Optional DKIM signing applied to outbound MIME. */
   dkim?: DKIMConfig;
   /** Plugins run sequentially before message construction. */
   plugins?: MailPlugin[];
@@ -216,9 +272,13 @@ export interface SMTPConfig extends PoolConfig {
 
 /** SMTP authentication credentials and method hint. */
 export interface SMTPAuth {
+  /** SMTP username (often the email address). */
   user: string;
+  /** Password for LOGIN, PLAIN, or CRAM-MD5 authentication. */
   pass?: string;
+  /** Preferred AUTH mechanism. Auto-selected from server capabilities when omitted. */
   type?: "LOGIN" | "PLAIN" | "CRAM-MD5" | "OAUTH2";
+  /** OAuth2 configuration for XOAUTH2 authentication. */
   oauth2?: OAuth2Config;
 }
 
@@ -226,9 +286,13 @@ export interface SMTPAuth {
 
 /** High-level mailer API wrapping a transport. */
 export interface Mailer {
+  /** Send a single email message. */
   send(options: MailOptions): Promise<SendResult>;
+  /** Send multiple messages with optional concurrency limits. */
   sendBulk(messages: MailOptions[], options?: BulkSendOptions): Promise<BulkSendResult>;
+  /** Verify transport connectivity and credentials. */
   verify(): Promise<VerifyResult>;
+  /** Close the underlying transport and release resources. */
   close(): Promise<void>;
 }
 
