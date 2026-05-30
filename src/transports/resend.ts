@@ -49,7 +49,9 @@ export class ResendError extends Error {
  * Resend HTTP API transport.
  */
 export class ResendTransport implements Transport {
+  /** Resend API key for Bearer authentication. */
   private readonly apiKey: string;
+  /** Resend API base URL. */
   private readonly baseUrl: string;
 
   /** Creates a Resend transport with the given API key. */

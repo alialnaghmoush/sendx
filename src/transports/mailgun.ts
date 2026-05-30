@@ -44,8 +44,11 @@ export class MailgunError extends Error {
  * Mailgun HTTP API transport (multipart/form-data).
  */
 export class MailgunTransport implements Transport {
+  /** Mailgun API key for basic authentication. */
   private readonly apiKey: string;
+  /** Mailgun sending domain. */
   private readonly domain: string;
+  /** Mailgun API base URL (US or EU region). */
   private readonly baseUrl: string;
 
   /** Creates a Mailgun transport with the given API key and domain. */

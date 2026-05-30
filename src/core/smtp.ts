@@ -22,10 +22,15 @@ export type SMTPCommand =
 
 /** Parsed SMTP server response. */
 export interface SMTPResponse {
+  /** Three-digit SMTP status code. */
   code: number;
+  /** Human-readable response text after the status code. */
   message: string;
+  /** True when the code is in the 2xx success range. */
   isSuccess: boolean;
+  /** True when the code is 354 (ready for message data). */
   isReady: boolean;
+  /** True when the code is 4xx or 5xx. */
   isError: boolean;
 }
 

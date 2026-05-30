@@ -43,10 +43,15 @@ export class SESError extends Error {
  * AWS SES v2 HTTP API transport.
  */
 export class SESTransport implements Transport {
+  /** AWS access key ID for SigV4 signing. */
   private readonly accessKeyId: string;
+  /** AWS secret access key for SigV4 signing. */
   private readonly secretAccessKey: string;
+  /** AWS region for the SES endpoint. */
   private readonly region: string;
+  /** Optional STS session token for temporary credentials. */
   private readonly sessionToken: string | undefined;
+  /** Optional DKIM config for raw MIME attachment sends. */
   private readonly dkim: SESConfig["dkim"];
 
   /** Creates an SES transport with AWS credentials. */

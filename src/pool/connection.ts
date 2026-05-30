@@ -24,9 +24,13 @@ export interface PooledConnection {
 
 /** Options for creating a pooled connection. */
 export interface PooledConnectionOptions {
+  /** SMTP configuration for the pooled session. */
   config: SMTPConfig;
+  /** Maximum messages before this connection is recycled. */
   maxMessages: number;
+  /** Hostname to connect to (may differ from config.host for direct MX). */
   connectHost: string;
+  /** Factory that creates the socket adapter for this connection. */
   createAdapter: () => Promise<import("../core/types.js").SocketAdapter>;
 }
 

@@ -40,9 +40,13 @@ const EXPIRY_BUFFER_MS = 30_000;
  * OAuth2 client with in-memory token cache and automatic refresh.
  */
 export class OAuth2Client {
+  /** OAuth2 configuration supplied at construction. */
   private readonly config: OAuth2Config;
+  /** Cached access token, or null before the first fetch. */
   private cachedToken: string | null = null;
+  /** Expiry timestamp (ms) for the cached access token. */
   private expiresAt = 0;
+  /** In-flight refresh promise used to deduplicate concurrent refreshes. */
   private refreshPromise: Promise<string> | null = null;
 
   /** Creates an OAuth2 client from configuration. */

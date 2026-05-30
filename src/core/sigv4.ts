@@ -19,19 +19,29 @@
 
 /** AWS credentials and signing scope for SigV4. */
 export interface SigV4Credentials {
+  /** AWS access key ID. */
   accessKeyId: string;
+  /** AWS secret access key. */
   secretAccessKey: string;
+  /** AWS region (e.g. `us-east-1`). */
   region: string;
+  /** AWS service name (e.g. `ses`, `s3`). */
   service: string;
+  /** Optional STS session token for temporary credentials. */
   sessionToken?: string;
 }
 
 /** HTTP request to sign with AWS Signature Version 4. */
 export interface SigV4Request {
+  /** HTTP method (e.g. `POST`). */
   method: string;
+  /** Full request URL including path and query. */
   url: string;
+  /** Request headers to include in the signature. */
   headers: Record<string, string>;
+  /** Request body as a string (empty for GET). */
   body: string;
+  /** AWS credentials and signing scope. */
   credentials: SigV4Credentials;
   /** Override datetime for testing. Full 'YYYYMMDDTHHMMSSZ' when provided. */
   _date?: string;

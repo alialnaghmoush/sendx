@@ -47,6 +47,7 @@ export class SendGridError extends Error {
  * SendGrid v3 HTTP API transport.
  */
 export class SendGridTransport implements Transport {
+  /** SendGrid API key for Bearer authentication. */
   private readonly apiKey: string;
 
   /** Creates a SendGrid transport with the given API key. */

@@ -53,10 +53,14 @@ interface QueueEntry {
  * Token bucket rate limiter with lazy refill on acquire.
  */
 class RateLimiter {
+  /** Remaining tokens in the current rate-limit window. */
   private tokens: number;
+  /** Timestamp (ms) of the last token refill. */
   private lastRefill: number;
+  /** Resolvers waiting for a token when the bucket is empty. */
   private waiters: Array<() => void> = [];
 
+  /** Creates a rate limiter with the given burst size and window duration. */
   constructor(
     private readonly rateDelta: number,
     private readonly rateLimit: number,
@@ -85,6 +89,7 @@ class RateLimiter {
     this.refill();
   }
 
+  /** Refills tokens based on elapsed time and wakes waiting acquirers. */
   private refill(): void {
     const t = this.now();
     const elapsed = t - this.lastRefill;
@@ -105,15 +110,25 @@ class RateLimiter {
  * SMTP connection pool with optional rate limiting.
  */
 export class SMTPPool implements Transport {
+  /** Resolved SMTP and pool configuration. */
   private readonly config: SMTPConfig & PoolConfig;
+  /** Maximum simultaneous pooled connections. */
   private readonly maxConnections: number;
+  /** Maximum messages per connection before recycle. */
   private readonly maxMessages: number;
+  /** Factory that creates a socket adapter for each new connection. */
   private readonly createAdapterFn: () => Promise<SocketAdapter>;
+  /** Optional token-bucket rate limiter, or null when disabled. */
   private readonly rateLimiter: RateLimiter | null;
+  /** Active pooled SMTP connections. */
   private readonly connections: PooledConnection[] = [];
+  /** Pending send operations waiting for a connection. */
   private readonly queue: QueueEntry[] = [];
+  /** True while {@link close} is draining; rejects new sends. */
   private draining = false;
+  /** True after the pool has fully closed. */
   private closed = false;
+  /** Serializes queue processing to avoid concurrent drain races. */
   private processChain: Promise<void> = Promise.resolve();
 
   /** Creates an SMTP connection pool. */
@@ -155,6 +170,7 @@ export class SMTPPool implements Transport {
     });
   }
 
+  /** Schedules asynchronous processing of the send queue. */
   private scheduleProcess(): void {
     this.processChain = this.processChain.then(() => this.processQueue()).catch(() => undefined);
   }
@@ -197,6 +213,7 @@ export class SMTPPool implements Transport {
     return this.queue.length;
   }
 
+  /** Dispatches queued messages to idle or newly spawned connections. */
   private async processQueue(): Promise<void> {
     if (this.draining) {
       return;
@@ -249,6 +266,7 @@ export class SMTPPool implements Transport {
     }
   }
 
+  /** Opens a new authenticated pooled SMTP connection. */
   private async spawnConnection(): Promise<PooledConnection> {
     const resolved = resolveSMTPConfig(this.config);
     const conn = await createPooledConnection({
@@ -261,6 +279,7 @@ export class SMTPPool implements Transport {
     return conn;
   }
 
+  /** Removes a connection from the active pool list. */
   private removeConnection(conn: PooledConnection): void {
     const index = this.connections.indexOf(conn);
     if (index >= 0) {
@@ -268,6 +287,7 @@ export class SMTPPool implements Transport {
     }
   }
 
+  /** Waits until the send queue and in-flight work are fully drained. */
   private async drainQueue(): Promise<void> {
     while (this.queue.length > 0 || this.connections.some((c) => !c.idle)) {
       await this.processQueue();

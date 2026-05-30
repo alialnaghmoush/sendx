@@ -40,9 +40,13 @@ function sanitizeAddress(addr: Address): Address {
 
 /** Result of building a complete MIME message. */
 export interface MIMEBuildResult {
+  /** Complete raw MIME message bytes ready to send. */
   raw: Uint8Array;
+  /** SMTP envelope derived from From/To/Cc/Bcc. */
   envelope: Envelope;
+  /** Message-ID assigned or supplied for the message. */
   messageId: string;
+  /** Size of the raw MIME message in bytes. */
   size: number;
 }
 

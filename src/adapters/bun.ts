@@ -43,10 +43,15 @@ export interface BunAdapterOptions {
  * Bun socket adapter using node:net and node:tls (Node compat layer).
  */
 export class BunAdapter implements SocketAdapter {
+  /** Underlying TCP or TLS socket (Node compat layer). */
   private socket: net.Socket | tls.TLSSocket | null = null;
+  /** Whether the connection is currently encrypted. */
   private _secure: boolean;
+  /** Whether the socket is connected. */
   private _connected = false;
+  /** Socket connect timeout in milliseconds. */
   private readonly connectionTimeout: number;
+  /** TLS options for direct TLS and STARTTLS upgrades. */
   private readonly tlsOptions: TLSOptions;
 
   /** Creates a Bun socket adapter (requires the Bun runtime). */
@@ -206,6 +211,7 @@ export class BunAdapter implements SocketAdapter {
     this._connected = false;
   }
 
+  /** Opens a plain TCP connection to the SMTP server. */
   private connectPlain(host: string, port: number): Promise<void> {
     return new Promise((resolve, reject) => {
       const socket = net.connect({ host, port }, () => resolve());
@@ -219,6 +225,7 @@ export class BunAdapter implements SocketAdapter {
     });
   }
 
+  /** Opens a direct TLS connection to the SMTP server. */
   private connectTls(host: string, port: number): Promise<void> {
     warnRejectUnauthorizedDisabled(this.tlsOptions);
     return new Promise((resolve, reject) => {

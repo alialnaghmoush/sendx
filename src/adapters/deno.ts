@@ -49,9 +49,13 @@ export interface DenoAdapterOptions {
  * Deno socket adapter using Deno.connect / Deno.startTls.
  */
 export class DenoAdapter implements SocketAdapter {
+  /** Active Deno TCP or TLS connection. */
   private conn: DenoConn | null = null;
+  /** Whether the connection is currently encrypted. */
   private _secure: boolean;
+  /** Whether the socket is connected. */
   private _connected = false;
+  /** TLS options for direct TLS and STARTTLS upgrades. */
   private readonly tlsOptions: TLSOptions;
 
   /** Creates a Deno socket adapter (requires the Deno runtime). */

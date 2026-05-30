@@ -48,11 +48,17 @@ export interface CloudflareAdapterOptions {
  * - No DNS MX lookup — explicit SMTP relay host required
  */
 export class CloudflareAdapter implements SocketAdapter {
+  /** Underlying Cloudflare Workers socket. */
   private socket: CFSocket | null = null;
+  /** Writable stream writer for outbound bytes. */
   private writer: WritableStreamDefaultWriter<Uint8Array> | null = null;
+  /** Whether the connection is currently encrypted. */
   private _secure: boolean;
+  /** Whether the socket is connected. */
   private _connected = false;
+  /** Whether implicit TLS is used on connect (port 465 style). */
   private readonly directTls: boolean;
+  /** Whether STARTTLS upgrade is enabled after plain connect. */
   private readonly starttls: boolean;
 
   /** Creates a Cloudflare Workers socket adapter. */

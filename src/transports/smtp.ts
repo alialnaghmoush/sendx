@@ -47,7 +47,9 @@ import { resolveAttachments } from "./resolve-attachments.js";
  * SMTP transport orchestrating adapter, MIME builder, and protocol logic.
  */
 export class SMTPTransport implements Transport {
+  /** Resolved SMTP configuration with defaults applied. */
   private readonly config: ResolvedSMTPConfig;
+  /** Active socket adapter for the current session, if any. */
   private adapter: SocketAdapter | null = null;
 
   /** Creates an SMTP transport with the given configuration. */
@@ -109,6 +111,7 @@ export class SMTPTransport implements Transport {
     }
   }
 
+  /** Returns the configured socket adapter or throws if none is set. */
   private async getAdapter(): Promise<SocketAdapter> {
     if (!this.config.adapter) {
       throw new SMTPError("No socket adapter configured", 0, "CONNECT", "");

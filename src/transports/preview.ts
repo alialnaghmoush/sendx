@@ -40,8 +40,11 @@ function getOpenCommand(platform: string): string {
  * Development transport that writes emails to disk instead of sending them.
  */
 export class PreviewTransport implements Transport {
+  /** Directory where preview `.eml` or `.html` files are written. */
   private readonly outDir: string;
+  /** Whether to open the written file in the default browser. */
   private readonly open: boolean;
+  /** Output format: full MIME (`.eml`) or HTML body only. */
   private readonly format: "eml" | "html";
 
   /** Creates a preview transport with optional output directory and format. */

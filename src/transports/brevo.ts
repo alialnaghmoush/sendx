@@ -47,6 +47,7 @@ function toAddressObjects(input: MailOptions["to"]): Array<{ email: string; name
  * Brevo HTTP API transport.
  */
 export class BrevoTransport implements Transport {
+  /** Brevo API key used for Authorization. */
   private readonly apiKey: string;
 
   /** Creates a Brevo transport with the given API key. */

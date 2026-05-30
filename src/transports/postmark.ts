@@ -47,6 +47,7 @@ export class PostmarkError extends Error {
  * Postmark HTTP API transport.
  */
 export class PostmarkTransport implements Transport {
+  /** Postmark server API token for the X-Postmark-Server-Token header. */
   private readonly serverToken: string;
 
   /** Creates a Postmark transport with the given server token. */

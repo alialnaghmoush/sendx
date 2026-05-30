@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.6] — 2026-05-30
+
+### Documentation
+
+- Documented all remaining exported symbols (class members, interface
+  properties, and internal helpers) for 100% JSR symbol documentation
+  coverage across adapters, transports, pool, OAuth2, MIME, SigV4, and
+  SMTP protocol types
+
 ## [0.4.5] — 2026-05-30
 
 ### Documentation

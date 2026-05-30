@@ -57,16 +57,23 @@ function shouldRetry(err: unknown, retryOn: number[]): boolean {
  * Decorator transport that retries failed sends with configurable backoff.
  */
 export class RetryTransport implements Transport {
+  /** Maximum send attempts including the initial try. */
   private readonly maxAttempts: number;
+  /** Backoff strategy between retries. */
   private readonly backoff: "exponential" | "linear" | "fixed";
+  /** Base delay in milliseconds before the first retry. */
   private readonly baseDelay: number;
+  /** HTTP status codes that trigger a retry. */
   private readonly retryOn: number[];
+  /** Optional callback invoked before each retry attempt. */
   private readonly onRetry: RetryConfig["onRetry"];
 
   /** Wraps an inner transport with retry logic and optional backoff configuration. */
   constructor(
+    /** Transport that performs the actual send on each attempt. */
     private readonly inner: Transport,
     config?: RetryConfig,
+    /** Injectable sleep function for testing backoff timing. */
     private readonly _sleep: (ms: number) => Promise<void> = (ms) =>
       new Promise((resolve) => setTimeout(resolve, ms)),
   ) {

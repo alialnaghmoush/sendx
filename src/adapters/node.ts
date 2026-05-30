@@ -41,10 +41,15 @@ export interface NodeAdapterOptions {
  * Node.js socket adapter using node:net and node:tls.
  */
 export class NodeAdapter implements SocketAdapter {
+  /** Underlying Node.js TCP or TLS socket. */
   private socket: net.Socket | tls.TLSSocket | null = null;
+  /** Whether the connection is currently encrypted. */
   private _secure: boolean;
+  /** Whether the socket is connected. */
   private _connected = false;
+  /** Socket connect timeout in milliseconds. */
   private readonly connectionTimeout: number;
+  /** TLS options for direct TLS and STARTTLS upgrades. */
   private readonly tlsOptions: TLSOptions;
 
   /** Creates a Node.js socket adapter. */
@@ -201,6 +206,7 @@ export class NodeAdapter implements SocketAdapter {
     this._connected = false;
   }
 
+  /** Opens a plain TCP connection to the SMTP server. */
   private connectPlain(host: string, port: number): Promise<void> {
     return new Promise((resolve, reject) => {
       const socket = net.connect({ host, port }, () => resolve());
@@ -214,6 +220,7 @@ export class NodeAdapter implements SocketAdapter {
     });
   }
 
+  /** Opens a direct TLS connection to the SMTP server. */
   private connectTls(host: string, port: number): Promise<void> {
     warnRejectUnauthorizedDisabled(this.tlsOptions);
     return new Promise((resolve, reject) => {
