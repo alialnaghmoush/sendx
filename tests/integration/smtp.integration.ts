@@ -5,7 +5,7 @@
  *
  * Usage: bun run tests/integration/smtp.integration.ts
  */
-import { createMailer } from "../../src/index.js";
+import { createMailer } from "../../dist/index.js";
 
 function assert(condition: boolean, message: string): void {
   if (!condition) {

@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4.2] — 2026-05-30
+
+### Fixed
+
+- CI: replaced node -e dynamic import with scripts/smoke.mjs
+  (top-level await ESM) for reliable Node.js smoke testing
+- CI: integration test now imports from dist/index.js directly
+  instead of relying on package self-reference resolution
+- CI: updated GitHub Actions to latest patch versions
+
 ## [0.4.1] — 2026-05-30
 
 ### Fixed

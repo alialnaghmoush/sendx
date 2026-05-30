@@ -54,9 +54,9 @@ describe("SMTPTransport", () => {
     const adapter = new MockAdapter();
     adapter.setResponses([
       "220 smtp.example.com ESMTP\r\n",
-      "250-smtp.example.com\r\n250 AUTH LOGIN PLAIN\r\n",
+      "250-smtp.example.com\r\n250-STARTTLS\r\n250 AUTH LOGIN PLAIN\r\n",
       "220 Ready to start TLS\r\n",
-      "250-smtp.example.com\r\n250 AUTH LOGIN PLAIN\r\n",
+      "250-smtp.example.com\r\n250-STARTTLS\r\n250 AUTH LOGIN PLAIN\r\n",
       "334 VXNlcm5hbWU6\r\n",
       "334 UGFzc3dvcmQ6\r\n",
       "235 Authentication successful\r\n",

@@ -163,7 +163,8 @@ export async function openSMTPSession(
   assertResponse(greeting, [220], "greeting");
 
   let capabilities = await ehlo(adapter, config.host);
-  if (!config.secure && !adapter.secure) {
+  const supportsStartTls = capabilities.some((cap) => cap.toUpperCase() === "STARTTLS");
+  if (!config.secure && !adapter.secure && supportsStartTls) {
     await sendRaw(adapter, encodeCommand({ type: "STARTTLS" }));
     const starttlsResp = await readSMTPResponse(adapter);
     assertResponse(starttlsResp, [220], "STARTTLS");
