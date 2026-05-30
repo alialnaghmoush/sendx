@@ -50,9 +50,11 @@ export function encodeCommand(cmd: SMTPCommand): Uint8Array {
   let line: string;
 
   switch (cmd.type) {
-    case "EHLO":
-      line = `EHLO ${cmd.domain}`;
+    case "EHLO": {
+      const safeDomain = cmd.domain.replace(/[\r\n]/g, "");
+      line = `EHLO ${safeDomain}`;
       break;
+    }
     case "STARTTLS":
       line = "STARTTLS";
       break;

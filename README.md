@@ -214,6 +214,8 @@ await mailer.verify(); // test connection + auth
 
 **AUTH methods:** XOAUTH2, CRAM-MD5, LOGIN, and PLAIN (auto-negotiated from EHLO unless `auth.type` is set).
 
+**`requireTLS` (default `true` when `auth` is set):** sently refuses to send credentials over an unencrypted connection. If the link is not secured by direct TLS (`secure: true`) or a successful `STARTTLS` upgrade, authentication throws an `SMTPError` instead of leaking credentials — this defends against STARTTLS-stripping MITM attacks. Set `requireTLS: false` only if you fully trust the network (not recommended).
+
 #### DKIM signing
 
 ```typescript
@@ -503,6 +505,48 @@ try {
 ```
 
 Import error classes from their transport subpath — not from `sently` core. Each exports a `statusCode` property on HTTP failures.
+
+---
+
+## Security
+
+sently is built to be secure by default — protections are enforced at the library's core chokepoints, so they apply to every transport and every address field without any extra configuration.
+
+### Email header & SMTP command injection
+
+All addresses **and** display names are validated centrally in `parseAddresses()` (and re-asserted when rendering headers), before any normalization:
+
+- Rejects CR, LF, NUL, every other C0 control (`0x00`–`0x1F`), DEL (`0x7F`), and the Unicode line/paragraph separators `U+2028`/`U+2029`.
+- **Fails closed:** hostile input throws a clear error (with the offending code point) — it is never stripped, repaired, and then accepted.
+- Protects the **display name** too, so an ASCII name like `"Foo\r\nBcc: attacker@evil.com"` can no longer inject a header.
+- Enforced consistently across **From, To, Cc, Bcc, and Reply-To**, and across **every transport** (SMTP, SES, Mailgun, Postmark, Resend, SendGrid, Brevo).
+
+```typescript
+await mailer.send({
+  from: "you@example.com",
+  to: { address: "victim@x.com\r\nBcc: attacker@evil.com" },
+  subject: "Hi",
+  text: "...",
+});
+// → throws: Email address contains a forbidden control character (0x0d)
+```
+
+MIME attachment filenames and custom attachment headers are likewise sanitized against header injection.
+
+### Credential protection
+
+- **`requireTLS`** (default `true` when `auth` is set) refuses to authenticate over a cleartext connection, defeating STARTTLS-stripping downgrade attacks.
+- **OAuth2 / XOAUTH2** and DKIM signing are built in via Web Crypto — no plaintext secrets in transit beyond what the protocol requires.
+
+### Attachments
+
+> ⚠️ `attachment.path` reads files from disk. Never pass user-controlled paths without validation.
+
+`resolveAttachments()` accepts an opt-in `basePath` that confines reads to an allowed directory and rejects path-traversal (including sibling-directory prefix tricks like `/var/data-secret` vs `/var/data`). Note: `basePath` does not dereference symlinks — use `fs.realpath()` first if symlink traversal is a concern.
+
+### Supply chain
+
+**Zero runtime dependencies** — there is no transitive dependency tree to audit or to be compromised.
 
 ---
 

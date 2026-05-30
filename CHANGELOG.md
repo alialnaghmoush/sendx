@@ -1,5 +1,50 @@
 # Changelog
 
+## [0.4.4] — 2026-05-30
+
+### Security
+
+- Fixed SigV4 date format: slice(0,15) not slice(0,16) — all real
+  SES requests were producing malformed x-amz-date headers
+- Added requireTLS guard before SMTP AUTH (default: true when auth
+  is set) — prevents credential exposure on STARTTLS-stripping attacks
+- Hardened email address validation against header and SMTP command
+  injection, enforced centrally in `parseAddresses()` (and re-asserted
+  at render time in `toMIMEHeader()`):
+  - Rejects CR, LF, NUL, all other C0 control characters (0x00–0x1F),
+    DEL (0x7F), and the Unicode line/paragraph separators U+2028/U+2029
+  - Fails closed: hostile input throws a clear error with the offending
+    code point instead of being accepted
+  - No repair or normalization of malicious input — addresses are never
+    transformed (e.g. CR/LF stripped) and then accepted
+  - Protects the display name as well as the address; an ASCII display
+    name such as `"Foo\r\nBcc: ..."` can no longer inject a header
+  - Enforced consistently across every address field (From, To, Cc, Bcc,
+    Reply-To) and every transport (SMTP, SES, Mailgun, Postmark, Resend,
+    SendGrid, Brevo), since all of them route through `parseAddresses()`
+- Sanitized attachment filenames and custom attachment headers
+  against MIME header injection
+- Fixed basePath startsWith sibling-directory bypass in
+  resolve-attachments (now appends path separator before comparison)
+- Added CRLF guard on EHLO domain for consistency
+
+## [0.4.3] — 2026-05-30
+
+### Added
+
+- `llms.txt` for LLM/agent discovery (install, quick example, subpath
+  exports, and when-to-use guidance)
+- README: Nodemailer comparison table, 30-second tour, error handling,
+  and TypeScript sections
+- `CLAUDE.md` repository map for agents (core entry, adapters,
+  transports, tests, build)
+
+### Changed
+
+- README positioning, HTTP transport reference table, plugin docs
+  reorder, and tree-shaking callout
+- `package.json` description and npm keywords for discoverability
+
 ## [0.4.2] — 2026-05-30
 
 ### Fixed

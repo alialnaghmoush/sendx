@@ -55,6 +55,20 @@ describe("resolveAttachments basePath", () => {
     ).rejects.toThrow(/escapes basePath/);
   });
 
+  test("sibling directory with shared prefix is rejected (startsWith bypass)", async () => {
+    const baseDir = join(tempDir, "data");
+    const siblingDir = join(tempDir, "data-secret");
+    await mkdir(baseDir, { recursive: true });
+    await mkdir(siblingDir, { recursive: true });
+    await writeFile(join(siblingDir, "passwd"), "secret");
+
+    await expect(
+      resolveAttachments([{ filename: "passwd", path: join(siblingDir, "passwd") }], {
+        basePath: baseDir,
+      }),
+    ).rejects.toThrow(/escapes basePath/);
+  });
+
   test("no basePath set performs no check", async () => {
     const filePath = join(allowedDir, "file.txt");
     const result = await resolveAttachments([{ filename: "file.txt", path: filePath }]);

@@ -79,7 +79,7 @@ export async function hmacSHA256(key: Uint8Array | string, data: string): Promis
 export async function signRequest(request: SigV4Request): Promise<SigV4Result> {
   const { method, url, body, credentials } = request;
   const parsed = new URL(url);
-  const amzDate = request._date ?? `${new Date().toISOString().replace(/[-:]/g, "").slice(0, 16)}Z`;
+  const amzDate = request._date ?? `${new Date().toISOString().replace(/[-:]/g, "").slice(0, 15)}Z`;
   const dateStamp = amzDate.slice(0, 8);
 
   const headers: Record<string, string> = {

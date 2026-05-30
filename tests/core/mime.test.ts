@@ -226,4 +226,103 @@ describe("buildMIME", () => {
       /Content-Disposition: attachment; filename="empty.bin"\r\n\r\n\r\n------sently_/,
     );
   });
+
+  const baseMail = {
+    from: "sender@example.com",
+    to: "recipient@example.com",
+    subject: "hi",
+    text: "body",
+  } as const;
+
+  test("CRLF injection in recipient address is rejected (fail closed)", async () => {
+    await expect(
+      buildMIME({
+        ...baseMail,
+        to: { address: "victim@x.com\r\nBcc: attacker@evil.com" },
+      }),
+    ).rejects.toThrow(/control character/i);
+  });
+
+  test("CRLF injection rejected consistently across To/Cc/Bcc/Reply-To/From", async () => {
+    const evil = "x@y.com\r\nBcc: attacker@evil.com";
+
+    await expect(buildMIME({ ...baseMail, from: evil })).rejects.toThrow(/control character/i);
+    await expect(buildMIME({ ...baseMail, to: evil })).rejects.toThrow(/control character/i);
+    await expect(buildMIME({ ...baseMail, cc: evil })).rejects.toThrow(/control character/i);
+    await expect(buildMIME({ ...baseMail, bcc: evil })).rejects.toThrow(/control character/i);
+    await expect(buildMIME({ ...baseMail, replyTo: evil })).rejects.toThrow(/control character/i);
+  });
+
+  test("CRLF injection via display name is rejected (not collapsed)", async () => {
+    await expect(
+      buildMIME({
+        ...baseMail,
+        to: { name: "Foo\r\nBcc: attacker@evil.com", address: "victim@x.com" },
+      }),
+    ).rejects.toThrow(/control character/i);
+  });
+
+  test("bare LF and NUL bytes in address are rejected", async () => {
+    await expect(buildMIME({ ...baseMail, to: { address: "a@b.com\nx" } })).rejects.toThrow(
+      /control character/i,
+    );
+    await expect(buildMIME({ ...baseMail, to: { address: "a\u0000@b.com" } })).rejects.toThrow(
+      /control character/i,
+    );
+  });
+
+  test("address with trailing newline is rejected, never repaired-and-accepted", async () => {
+    await expect(
+      buildMIME({ ...baseMail, to: { address: "john@example.com\r\n" } }),
+    ).rejects.toThrow(/control character/i);
+  });
+
+  test("structurally malformed (but control-char-free) address throws format error", async () => {
+    await expect(
+      buildMIME({ ...baseMail, to: { address: "not-an-email" } }),
+    ).rejects.toThrow(/Invalid email address/);
+  });
+
+  test("CRLF injection in attachment filename is sanitized", async () => {
+    const result = await buildMIME({
+      from: "sender@example.com",
+      to: "recipient@example.com",
+      subject: "attach",
+      text: "See attached",
+      attachments: [
+        {
+          filename: 'note.txt"\r\nBcc: attacker@evil.com',
+          content: new TextEncoder().encode("x"),
+          contentType: "text/plain",
+        },
+      ],
+    });
+
+    const raw = decodeUtf8(result.raw);
+    // CRLF is collapsed to a space, so no injected header line is created.
+    expect(raw).not.toContain("\r\nBcc: attacker@evil.com");
+    expect(raw).not.toMatch(/filename="[^"]*\r\n/);
+  });
+
+  test("CRLF injection in custom attachment headers is sanitized", async () => {
+    const result = await buildMIME({
+      from: "sender@example.com",
+      to: "recipient@example.com",
+      subject: "attach",
+      text: "See attached",
+      attachments: [
+        {
+          filename: "note.txt",
+          content: new TextEncoder().encode("x"),
+          contentType: "text/plain",
+          headers: { "X-Custom": "value\r\nBcc: attacker@evil.com" },
+        },
+      ],
+    });
+
+    const raw = decodeUtf8(result.raw);
+    // CRLF is collapsed to a space, so no injected header line is created.
+    expect(raw).not.toContain("\r\nBcc: attacker@evil.com");
+    expect(raw).toContain("X-Custom: value Bcc: attacker@evil.com");
+  });
 });

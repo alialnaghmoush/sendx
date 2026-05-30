@@ -123,6 +123,7 @@ export interface ResolvedSMTPConfig {
   port: number;
   secure: boolean;
   auth?: SMTPConfig["auth"];
+  requireTLS?: boolean;
   tls?: SMTPConfig["tls"];
   dkim?: SMTPConfig["dkim"];
   connectionTimeout?: number;
@@ -140,6 +141,7 @@ export function resolveSMTPConfig(config: SMTPConfig): ResolvedSMTPConfig {
     port: config.port ?? (secure ? 465 : 587),
     secure,
     ...(config.auth !== undefined ? { auth: config.auth } : {}),
+    ...(config.requireTLS !== undefined ? { requireTLS: config.requireTLS } : {}),
     ...(config.dkim !== undefined ? { dkim: config.dkim } : {}),
     ...(config.tls !== undefined ? { tls: config.tls } : {}),
     ...(config.connectionTimeout !== undefined
@@ -173,6 +175,17 @@ export async function openSMTPSession(
   }
 
   if (config.auth) {
+    const tlsRequired = config.requireTLS ?? true;
+    const encrypted = adapter.secure || config.secure;
+    if (tlsRequired && !encrypted) {
+      throw new SMTPError(
+        "Refusing to authenticate over unencrypted connection. " +
+          "Set requireTLS: false to disable this check (not recommended).",
+        0,
+        "AUTH",
+        "",
+      );
+    }
     await authenticate(adapter, config.auth, capabilities);
   }
 }

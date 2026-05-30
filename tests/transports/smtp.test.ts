@@ -1,7 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { decodeUtf8 } from "../../src/core/base64.js";
+import { SMTPError } from "../../src/core/smtp.js";
 import type { SocketAdapter, TLSOptions } from "../../src/core/types.js";
-import { SMTPTransport } from "../../src/transports/smtp.js";
+import { openSMTPSession, resolveSMTPConfig, SMTPTransport } from "../../src/transports/smtp.js";
 
 class MockAdapter implements SocketAdapter {
   readonly commands: Uint8Array[] = [];
@@ -129,6 +130,62 @@ describe("SMTPTransport", () => {
     expect(() => atob(tokenB64)).not.toThrow();
     const decoded = decodeUtf8(Uint8Array.from(atob(tokenB64), (c) => c.charCodeAt(0)));
     expect(decoded).toContain("ya29.mock-token");
+  });
+
+  test("requireTLS (default) throws before AUTH on an unencrypted connection", async () => {
+    const adapter = new MockAdapter();
+    // Server does NOT advertise STARTTLS, so the connection stays cleartext.
+    adapter.setResponses([
+      "220 smtp.example.com ESMTP\r\n",
+      "250-smtp.example.com\r\n250 AUTH LOGIN PLAIN\r\n",
+    ]);
+    await adapter.connect("smtp.example.com", 587);
+
+    const config = resolveSMTPConfig({
+      host: "smtp.example.com",
+      port: 587,
+      auth: { user: "user", pass: "pass", type: "LOGIN" },
+      adapter,
+    });
+
+    let thrown: unknown;
+    try {
+      await openSMTPSession(adapter, config);
+    } catch (err) {
+      thrown = err;
+    }
+
+    expect(thrown).toBeInstanceOf(SMTPError);
+    expect((thrown as SMTPError).message).toMatch(/unencrypted connection/);
+
+    // AUTH must never be attempted over cleartext.
+    const dialog = adapter.commands.map((c) => decodeUtf8(c)).join("");
+    expect(dialog).not.toContain("AUTH LOGIN");
+  });
+
+  test("requireTLS: false allows AUTH on an unencrypted connection", async () => {
+    const adapter = new MockAdapter();
+    adapter.setResponses([
+      "220 smtp.example.com ESMTP\r\n",
+      "250-smtp.example.com\r\n250 AUTH LOGIN PLAIN\r\n",
+      "334 VXNlcm5hbWU6\r\n",
+      "334 UGFzc3dvcmQ6\r\n",
+      "235 Authentication successful\r\n",
+    ]);
+    await adapter.connect("smtp.example.com", 587);
+
+    const config = resolveSMTPConfig({
+      host: "smtp.example.com",
+      port: 587,
+      requireTLS: false,
+      auth: { user: "user", pass: "pass", type: "LOGIN" },
+      adapter,
+    });
+
+    await openSMTPSession(adapter, config);
+
+    const dialog = adapter.commands.map((c) => decodeUtf8(c)).join("");
+    expect(dialog).toContain("AUTH LOGIN");
   });
 
   test("send with XOAUTH2 auth", async () => {

@@ -196,6 +196,13 @@ export interface SMTPConfig extends PoolConfig {
   port?: number;
   secure?: boolean;
   auth?: SMTPAuth;
+  /**
+   * Refuse to authenticate over a non-TLS connection.
+   * When true, throws SMTPError before sending AUTH if the connection
+   * is not encrypted. Prevents credential exposure on STARTTLS-stripping
+   * MITM attacks. Default: true when auth is set, false otherwise.
+   */
+  requireTLS?: boolean;
   tls?: TLSOptions;
   connectionTimeout?: number;
   greetingTimeout?: number;

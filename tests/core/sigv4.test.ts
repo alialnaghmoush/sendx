@@ -62,6 +62,27 @@ describe("signRequest", () => {
     expect(signed.headers.Authorization).toContain("Signature=");
   });
 
+  test("live date path produces valid AWS datetime format (no decimal point)", async () => {
+    const signed = await signRequest({
+      method: "POST",
+      url: "https://email.us-east-1.amazonaws.com/v2/email/outbound-emails",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: "{}",
+      credentials: {
+        accessKeyId: "AKIAIOSFODNN7EXAMPLE",
+        secretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+        region: "us-east-1",
+        service: "ses",
+      },
+      _date: undefined,
+    });
+
+    expect(signed.headers["x-amz-date"]).toMatch(/^\d{8}T\d{6}Z$/);
+    expect(signed.headers["x-amz-date"]).not.toContain(".");
+  });
+
   test("includes x-amz-security-token when sessionToken is provided", async () => {
     const signed = await signRequest({
       method: "POST",

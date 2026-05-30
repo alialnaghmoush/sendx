@@ -2,8 +2,16 @@ import type { Attachment } from "../core/types.js";
 
 /** Options for {@link resolveAttachments}. */
 export interface ResolveAttachmentsOptions {
-  /** If set, attachment paths must resolve within this directory.
-   *  Prevents symlink escape and path traversal. Opt-in only. */
+  /**
+   * If set, attachment paths must resolve within this directory.
+   * Prevents path traversal via `..` segments and sibling-directory
+   * prefix matches. Opt-in only.
+   *
+   * Note: this check uses `node:path` `resolve()`, which does NOT
+   * dereference symlinks. A symlink located inside `basePath` that
+   * points outside of it will pass this check. If symlink traversal is
+   * a concern, resolve paths with `fs.realpath()` before passing them in.
+   */
   basePath?: string;
 }
 
@@ -35,12 +43,16 @@ export async function resolveAttachments(
       }
 
       if (options?.basePath) {
-        const { resolve } = await import("node:path");
+        const { resolve, sep } = await import("node:path");
         const resolvedPath = resolve(attachment.path);
         const resolvedBase = resolve(options.basePath);
-        if (!resolvedPath.startsWith(resolvedBase)) {
+        // startsWith alone is vulnerable: "/var/data-secret" passes "/var/data".
+        // Require an exact match or a trailing path separator.
+        const isWithin =
+          resolvedPath === resolvedBase || resolvedPath.startsWith(resolvedBase + sep);
+        if (!isWithin) {
           throw new Error(
-            `[sently] Attachment path "${resolvedPath}" escapes basePath "${options.basePath}". ` +
+            `[sently] Attachment path "${resolvedPath}" escapes basePath "${resolvedBase}". ` +
               "Use absolute paths within the allowed directory.",
           );
         }

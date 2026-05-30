@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import {
+  assertSafeAddress,
   extractEmails,
   isValidEmail,
   parseAddresses,
@@ -85,5 +86,76 @@ describe("isValidEmail", () => {
   test("invalid emails", () => {
     expect(isValidEmail("not-an-email")).toBe(false);
     expect(isValidEmail("@example.com")).toBe(false);
+  });
+
+  test("rejects control characters including NUL", () => {
+    expect(isValidEmail("a@b.com\r\nBcc: x@y.com")).toBe(false);
+    expect(isValidEmail("a@b.com\n")).toBe(false);
+    expect(isValidEmail("a@b.com\r")).toBe(false);
+    expect(isValidEmail("a\u0000@b.com")).toBe(false);
+    expect(isValidEmail("a@b.com\u2028")).toBe(false);
+  });
+});
+
+describe("address injection guard", () => {
+  test("assertSafeAddress throws on CR, LF, and NUL", () => {
+    expect(() => assertSafeAddress("a@b.com\r")).toThrow(/control character/i);
+    expect(() => assertSafeAddress("a@b.com\n")).toThrow(/control character/i);
+    expect(() => assertSafeAddress("a\u0000@b.com")).toThrow(/control character/i);
+  });
+
+  test("assertSafeAddress reports the offending code point", () => {
+    expect(() => assertSafeAddress("a@b.com\n")).toThrow(/0x0a/);
+  });
+
+  test("assertSafeAddress allows clean ASCII and Unicode display names", () => {
+    expect(() => assertSafeAddress("ali@example.com")).not.toThrow();
+    expect(() => assertSafeAddress("علي", "display name")).not.toThrow();
+  });
+
+  test("parseAddresses rejects CRLF in a string address before splitting", () => {
+    expect(() => parseAddresses("victim@x.com\r\nBcc: attacker@evil.com")).toThrow(
+      /control character/i,
+    );
+  });
+
+  test("parseAddresses rejects CRLF hidden inside a multi-address list", () => {
+    expect(() => parseAddresses("a@b.com,\r\nBcc: evil@x.com <c@d.com>")).toThrow(
+      /control character/i,
+    );
+  });
+
+  test("parseAddresses rejects control chars in an Address object address", () => {
+    expect(() => parseAddresses({ address: "a@b.com\r\nBcc: evil@x.com" })).toThrow(
+      /control character/i,
+    );
+  });
+
+  test("parseAddresses rejects control chars in a display name", () => {
+    expect(() =>
+      parseAddresses({ name: "Foo\r\nBcc: evil@x.com", address: "a@b.com" }),
+    ).toThrow(/display name contains a forbidden control character/i);
+  });
+
+  test("extractEmails fails closed on injected input (HTTP transport path)", () => {
+    expect(() => extractEmails(["ok@b.com", "evil@x.com\r\nBcc: a@b.com"])).toThrow(
+      /control character/i,
+    );
+  });
+
+  test("toMIMEHeader re-validates at render time (defense in depth)", () => {
+    expect(() => toMIMEHeader({ address: "a@b.com\r\nBcc: evil@x.com" })).toThrow(
+      /control character/i,
+    );
+    expect(() => toMIMEHeader({ name: "Foo\r\nBcc: x", address: "a@b.com" })).toThrow(
+      /control character/i,
+    );
+  });
+
+  test("input that would become valid after stripping is still rejected (no repair)", () => {
+    // Trailing CRLF would 'repair' to a valid address if stripped — must throw.
+    expect(() => parseAddresses({ address: "john@example.com\r\n" })).toThrow(
+      /control character/i,
+    );
   });
 });

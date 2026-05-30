@@ -1,5 +1,11 @@
 // src/core/mime.ts
-import { extractEmails, parseAddresses, toMIMEHeader } from "./address.js";
+import {
+  assertSafeAddress,
+  extractEmails,
+  isValidEmail,
+  parseAddresses,
+  toMIMEHeader,
+} from "./address.js";
 import { encodeBase64, encodeHeader, encodeUtf8 } from "./base64.js";
 import { signDKIM } from "./dkim.js";
 import type { Address, Attachment, DKIMConfig, Envelope, MailOptions } from "./types.js";
@@ -9,10 +15,27 @@ function sanitizeHeaderValue(value: string): string {
 }
 
 function sanitizeAddress(addr: Address): Address {
-  if (!addr.name) {
-    return addr;
+  // Security check runs on the raw value FIRST and fails closed: any control
+  // character (CR/LF/NUL/…) is rejected outright rather than stripped and
+  // accepted. parseAddresses() already enforces this upstream; re-asserting
+  // here keeps the function safe if it is ever called directly.
+  assertSafeAddress(addr.address, "address");
+  if (addr.name !== undefined) {
+    assertSafeAddress(addr.name, "display name");
   }
-  return { ...addr, name: sanitizeHeaderValue(addr.name) };
+
+  // Only ordinary surrounding whitespace is trimmed — the address identity is
+  // never altered (no CR/LF-to-space repair).
+  const address = addr.address.trim();
+  if (!isValidEmail(address)) {
+    throw new Error(`Invalid email address: ${JSON.stringify(addr.address)}`);
+  }
+
+  const sanitized: Address = { address };
+  if (addr.name) {
+    sanitized.name = sanitizeHeaderValue(addr.name);
+  }
+  return sanitized;
 }
 
 /** Result of building a complete MIME message. */
@@ -201,10 +224,11 @@ function formatAttachmentPart(attachment: Attachment): string {
     throw new Error(`Attachment "${attachment.filename}" requires Uint8Array content`);
   }
 
+  const safeFilename = sanitizeHeaderValue(attachment.filename ?? "");
   const headers = [
     `Content-Type: ${attachment.contentType ?? "application/octet-stream"}`,
     "Content-Transfer-Encoding: base64",
-    `Content-Disposition: ${attachment.inline ? "inline" : "attachment"}; filename="${attachment.filename}"`,
+    `Content-Disposition: ${attachment.inline ? "inline" : "attachment"}; filename="${safeFilename}"`,
   ];
 
   if (attachment.contentId) {
@@ -213,7 +237,9 @@ function formatAttachmentPart(attachment: Attachment): string {
 
   if (attachment.headers) {
     for (const [key, value] of Object.entries(attachment.headers)) {
-      headers.push(`${key}: ${value}`);
+      const safeKey = sanitizeHeaderValue(key);
+      const safeValue = sanitizeHeaderValue(value);
+      headers.push(`${safeKey}: ${safeValue}`);
     }
   }
 
